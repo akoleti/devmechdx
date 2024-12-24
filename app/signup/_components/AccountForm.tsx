@@ -236,8 +236,8 @@ export default function AccountForm({ onSubmit, initialData }: AccountFormProps)
           id="acceptTerms"
           checked={watch('acceptTerms')}
           onCheckedChange={(checked) => {
-            setValue('acceptTerms', checked as boolean, { 
-              shouldValidate: true 
+            setValue('acceptTerms', checked as true, {
+              shouldValidate: true
             });
           }}
           className={cn(errors.acceptTerms && "border-destructive")}

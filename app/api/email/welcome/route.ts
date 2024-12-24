@@ -21,7 +21,10 @@ export async function POST(request: Request) {
     });
 
     return Response.json({ success: true });
-  } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return Response.json({ error: error.message }, { status: 500 });
+    }
+    return Response.json({ error: 'An unknown error occurred' }, { status: 500 });
   }
-} 
+}

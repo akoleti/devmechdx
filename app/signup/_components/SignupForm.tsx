@@ -160,7 +160,7 @@ export default function SignupForm({ plan }: SignupFormProps) {
       if (currentStep === 'billing' && data.isTestCard) {
         toast.success('Test card accepted');
         // You might want to mark this as a test transaction in your form data
-        setFormData(prev => ({
+        setFormData((prev: FormData) => ({
           ...prev,
           ...data,
           isTestTransaction: true

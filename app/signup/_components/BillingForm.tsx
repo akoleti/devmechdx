@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from 'react';
-import { formatCardNumber, formatExpiryDate } from '@/lib/utils/formatters';
 
 const planDetails = {
   starter: {
