@@ -10,6 +10,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
+type ResourceItem = {
+  title: string;
+  date?: string;
+  type?: string;
+  duration?: string;
+};
+
 const resources = [
   {
     title: 'Blog & News',
@@ -131,7 +138,7 @@ const Resources = () => {
                   >
                     <span className="text-sm text-gray-900">{item.title}</span>
                     <span className="text-sm text-gray-500">
-                      {item.date || item.type || item.duration}
+                      {(item as any).date || (item as any).type || (item as any).duration}
                     </span>
                   </div>
                 ))}

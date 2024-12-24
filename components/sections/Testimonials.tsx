@@ -43,28 +43,18 @@ const testimonials = [
 
 const clientLogos = [
   { 
-    name: "Siemens",
-    logo: "https://companieslogo.com/img/orig/SIE.DE-5b19d6ec.png?t=1648148064",
+    name: "CCISD",
+    logo: "/images/brands/ccisd.png"
   },
   { 
-    name: "Caterpillar",
-    logo: "https://companieslogo.com/img/orig/CAT-0046c12e.png?t=1633497370",
+    name: "GrayGrids",
+    logo: "/images/brands/graygrids.svg",
+    darkLogo: "/images/brands/graygrids-light.svg"
   },
   { 
-    name: "General Electric",
-    logo: "https://companieslogo.com/img/orig/GE-e7c9f076.png?t=1633497702",
-  },
-  { 
-    name: "Bosch",
-    logo: "https://companieslogo.com/img/orig/BOSCHLTD.NS-4b4864c5.png?t=1604067645",
-  },
-  { 
-    name: "Mitsubishi",
-    logo: "https://companieslogo.com/img/orig/8058.T-a47d180c.png?t=1596940831",
-  },
-  { 
-    name: "Hitachi",
-    logo: "https://companieslogo.com/img/orig/6501.T-b6f3c3aa.png?t=1596940821",
+    name: "FormBold",
+    logo: "/images/brands/formbold.svg",
+    darkLogo: "/images/brands/formbold-light.svg"
   }
 ];
 
@@ -83,21 +73,19 @@ const Testimonials = () => {
 
         {/* Client Logos */}
         <div className="mt-16">
-          <div className="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-6 items-center">
+          <div className="grid grid-cols-2 gap-8 md:grid-cols-3 items-center justify-items-center">
             {clientLogos.map((client) => (
               <div
                 key={client.name}
-                className="col-span-1 flex justify-center"
+                className="col-span-1 flex justify-center grayscale hover:grayscale-0 transition-all"
               >
-                <div className="relative w-32 h-16">
-                  <Image
-                    src={client.logo}
-                    alt={client.name}
-                    fill
-                    className="object-contain filter grayscale hover:grayscale-0 transition-all duration-300"
-                    unoptimized
-                  />
-                </div>
+                <Image
+                  src={client.logo}
+                  alt={client.name}
+                  width={160}
+                  height={80}
+                  className="h-12 w-auto object-contain"
+                />
               </div>
             ))}
           </div>

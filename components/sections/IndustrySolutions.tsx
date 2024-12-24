@@ -74,7 +74,7 @@ const industries = [
     iconColor: 'text-red-600',
   },
   {
-    name: 'Hotels & Resorts',
+    name: 'Hotels Resorts',
     icon: Hotel,
     description: 'Guest comfort and energy efficiency management',
     useCases: [
@@ -131,7 +131,7 @@ const IndustrySolutions = () => {
 
                 <div className="mt-8">
                   <a 
-                    href={`/solutions/${industry.name.toLowerCase()}`}
+                    href={`/industries/${industry.name.replaceAll(' ','-').replaceAll('&','').toLowerCase()}`}
                     className={cn(
                       "inline-flex items-center text-sm font-medium",
                       industry.iconColor

@@ -2,33 +2,71 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { usePathname, useRouter } from 'next/navigation';
 
 const navigationItems = [
   { name: 'Home', href: '#home' },
   { name: 'Features', href: '#features' },
-  { name: 'Industries', href: '#industries' },
   { name: 'Benefits', href: '#benefits' },
+  { name: 'Industries', href: '#industries' },
   { name: 'Pricing', href: '#pricing' },
 ];
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('home');
+  const pathname = usePathname();
+  const router = useRouter();
 
-  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY < 100) {
+        setActiveSection('home');
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleNavigation = async (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
-    const element = document.querySelector(href);
-    if (element) {
-      const navbarHeight = 80; // Approximate navbar height
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - navbarHeight;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
+    const isHomePage = pathname === '/';
+    
+    if (!isHomePage) {
+      // If not on home page, navigate to home and then scroll
+      await router.push('/');
+      // Wait for navigation to complete
+      setTimeout(() => {
+        const element = document.querySelector(href);
+        if (element) {
+          const navbarHeight = 80;
+          const elementPosition = element.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - navbarHeight;
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
+    } else {
+      // If already on home page, just scroll
+      const element = document.querySelector(href);
+      if (element) {
+        const navbarHeight = 80;
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - navbarHeight;
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
     }
+    
+    setActiveSection(href.replace('#', ''));
     setIsMenuOpen(false);
   };
 
@@ -39,7 +77,7 @@ const Navbar = () => {
           {/* Logo and Navigation Items */}
           <div className="flex items-center space-x-8">
             {/* Logo */}
-            <Link href="/#home" className="flex items-center">
+            <Link href="/" className="flex items-center">
               <Image
                 src="/images/logo/primaryblack.png"
                 alt="MechDX Logo"
@@ -56,8 +94,11 @@ const Navbar = () => {
                 <a
                   key={item.name}
                   href={item.href}
-                  onClick={(e) => scrollToSection(e, item.href)}
-                  className="text-gray-700 hover:text-blue-600 transition-colors cursor-pointer"
+                  onClick={(e) => handleNavigation(e, item.href)}
+                  className={cn(
+                    "text-gray-700 hover:text-blue-600 transition-colors cursor-pointer",
+                    activeSection === item.href.replace('#', '') && "text-[#0F62FE] font-medium"
+                  )}
                 >
                   {item.name}
                 </a>
@@ -103,7 +144,7 @@ const Navbar = () => {
                 <a
                   key={item.name}
                   href={item.href}
-                  onClick={(e) => scrollToSection(e, item.href)}
+                  onClick={(e) => handleNavigation(e, item.href)}
                   className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md"
                 >
                   {item.name}

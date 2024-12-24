@@ -68,12 +68,13 @@ const KeyFeatures = () => {
           {features.map((feature) => (
             <div
               key={feature.name}
-              className="relative group bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-all"
+              className="relative bg-white p-8 rounded-2xl shadow-sm 
+                hover:shadow-md transition-all duration-300
+                border-2 border-transparent hover:border-[#0F62FE]"
             >
-              <div className="absolute -inset-px bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative">
+              <div>
                 <div className="inline-flex items-center justify-center p-2 bg-blue-600/10 rounded-lg">
-                  <feature.icon className="h-6 w-6 text-blue-600" />
+                  <feature.icon className="h-6 w-6 text-[#0F62FE]" />
                 </div>
                 <h3 className="mt-6 text-xl font-semibold leading-7 tracking-tight text-gray-900">
                   {feature.name}
@@ -82,8 +83,8 @@ const KeyFeatures = () => {
                   {feature.description}
                 </p>
                 <div className="mt-4 flex items-center gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-blue-600" />
-                  <p className="text-sm leading-6 text-blue-600">
+                  <div className="h-1.5 w-1.5 rounded-full bg-[#0F62FE]" />
+                  <p className="text-sm leading-6 text-[#0F62FE]">
                     {feature.benefits}
                   </p>
                 </div>
