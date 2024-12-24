@@ -12,7 +12,6 @@ const navigationItems = [
   { name: 'Features', href: '#features' },
   { name: 'Benefits', href: '#benefits' },
   { name: 'Industries', href: '#industries' },
-  { name: 'Pricing', href: '#pricing' },
 ];
 
 const Navbar = () => {
@@ -104,6 +103,7 @@ const Navbar = () => {
                 </a>
               ))}
             </nav>
+            <Link href="/pricing" className="text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">Pricing</Link>
           </div>
 
           {/* Right side buttons */}
