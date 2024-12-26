@@ -16,7 +16,7 @@ export async function POST(request: Request) {
         name,
         plan,
         trialDays,
-        verificationLink: `${process.env.NEXT_PUBLIC_APP_URL}/verify?token=${generateToken(email)}`
+        verificationLink: `${process.env.NEXT_PUBLIC_APP_URL}/verify?token=${email}`
       })
     });
 
