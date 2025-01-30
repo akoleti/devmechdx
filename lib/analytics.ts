@@ -8,8 +8,8 @@ type EventName =
 
 export function trackEvent(name: EventName, properties?: Record<string, any>) {
   // Initialize analytics (e.g., Segment, Mixpanel, etc.)
-  if (typeof window !== 'undefined' && window.analytics) {
-    window.analytics.track(name, {
+  if (typeof window !== 'undefined' && (window as any).analytics) {
+    (window as any).analytics.track(name, {
       ...properties,
       timestamp: new Date().toISOString()
     });
