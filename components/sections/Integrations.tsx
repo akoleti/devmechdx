@@ -1,15 +1,11 @@
 import { 
-  Cloud, 
-  Smartphone, 
   Shield, 
   Code2, 
-  Database,
   CheckCircle2,
   Building,
   Wifi,
   Settings
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
 const integrations = [

@@ -27,7 +27,7 @@ const planDetails = {
 } as const;
 
 interface BillingFormProps {
-  onSubmit: (data: any) => void;
+  onSubmit: (data: any) => Promise<void>;
   initialData?: any;
   plan: string;
   billing?: 'monthly' | 'annual';

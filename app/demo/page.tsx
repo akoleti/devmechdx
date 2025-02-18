@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Layout from '@/components/Layout';
-
+import Link from 'next/link';
 type FormData = {
   name: string;
   email: string;
@@ -51,10 +51,10 @@ export default function RequestDemo() {
             </div>
             <h2 className="text-2xl font-bold mb-4">Thank You!</h2>
             <p className="text-gray-600 mb-6">
-              We've received your demo request. Our team will contact you within 24 hours to schedule your personalized demo.
+              We have received your demo request. Our team will contact you within 24 hours to schedule your personalized demo.
             </p>
             <Button asChild>
-              <a href="/">Return Home</a>
+              <Link href="/">Return Home</Link>
             </Button>
           </div>
         </div>

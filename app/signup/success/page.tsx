@@ -31,7 +31,7 @@ export default function SuccessPage() {
           </p>
           <div className="mt-8 space-y-4">
             <p className="text-gray-600">
-              We've sent you an email with instructions to verify your account.
+              We&apos;ve sent you an email with instructions to verify your account.
             </p>
             <p className="text-gray-600">
               Once verified, you can start using MechDX right away.

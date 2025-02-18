@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
-
+import Link from 'next/link';
 const contactInfo = [
   {
     icon: Mail,
@@ -67,10 +67,10 @@ export default function Contact() {
             </div>
             <h2 className="text-2xl font-bold mb-4">Message Sent!</h2>
             <p className="text-gray-600 mb-6">
-              Thank you for contacting us. We'll get back to you within 24 hours.
+              Thank you for contacting us. We will get back to you within 24 hours.
             </p>
             <Button asChild>
-              <a href="/">Return Home</a>
+              <Link href="/">Return Home</Link>
             </Button>
           </div>
         </div>
@@ -88,7 +88,7 @@ export default function Contact() {
               Get in Touch
             </h1>
             <p className="mt-4 text-lg text-gray-600">
-              Have questions about MechDX? We're here to help.
+              Have questions about MechDX? We are here to help.
             </p>
           </div>
 

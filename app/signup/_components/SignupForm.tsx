@@ -2,27 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+
 import * as z from 'zod';
 import Layout from '@/components/Layout';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Checkbox } from '@/components/ui/checkbox';
+
 import { toast } from 'sonner';
-import { Eye, EyeOff } from 'lucide-react';
-import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { loadStripe } from '@stripe/stripe-js';
-import { trackEvent } from '@/lib/analytics';
 import TrialSignup from './TrialSignup';
 import AccountForm from './AccountForm';
 import BillingForm from './BillingForm';
 import ReviewForm from './ReviewForm';
-import { Container } from 'postcss';
 import { cn } from '@/lib/utils';
 
 // Validation schemas
@@ -195,7 +188,6 @@ export default function SignupForm({ plan }: SignupFormProps) {
       }
 
       // Regular Stripe payment flow for real cards
-      const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_KEY!);
       // ... rest of the payment logic ...
     } catch (error) {
       toast.error('Something went wrong', {
@@ -303,23 +295,14 @@ export default function SignupForm({ plan }: SignupFormProps) {
   );
 }
 
-// Utility functions
-function calculatePasswordStrength(password: string): number {
-  let strength = 0;
-  if (password.length >= 8) strength += 20;
-  if (/[A-Z]/.test(password)) strength += 20;
-  if (/[a-z]/.test(password)) strength += 20;
-  if (/[0-9]/.test(password)) strength += 20;
-  if (/[^A-Za-z0-9]/.test(password)) strength += 20;
-  return strength;
-}
+
 
 function luhnCheck(num: string) {
-  let arr = (num + '')
+  const arr = (num + '')
     .split('')
     .reverse()
     .map(x => parseInt(x));
-  let sum = arr.reduce((acc, val, i) => {
+  const sum = arr.reduce((acc, val, i) => {
     if (i % 2 !== 0) {
       const doubled = val * 2;
       return acc + (doubled > 9 ? doubled - 9 : doubled);

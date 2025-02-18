@@ -68,7 +68,7 @@ export default function TrialSignup({ plan, trialDays, features }: TrialSignupPr
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const [verificationSent, setVerificationSent] = useState(false);
-
+  const planName = planDetails[plan].name;
   const {
     register,
     handleSubmit,
@@ -82,7 +82,7 @@ export default function TrialSignup({ plan, trialDays, features }: TrialSignupPr
     setIsClient(true);
   }, []);
 
-  const planName = planDetails[plan].name;
+ 
 
   const onSubmit = async (data: TrialFormData) => {
     setIsSubmitting(true);
@@ -167,7 +167,7 @@ export default function TrialSignup({ plan, trialDays, features }: TrialSignupPr
             </p>
 
             <div className="mt-8 bg-blue-50 rounded-xl p-6">
-              <h2 className="font-semibold text-blue-900">What's included:</h2>
+              <h2 className="font-semibold text-blue-900">What&apos;s included:</h2>
               <ul className="mt-4 space-y-3">
                 {features.map((feature) => (
                   <li key={feature} className="flex items-center text-blue-800">

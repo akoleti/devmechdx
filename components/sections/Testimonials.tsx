@@ -129,7 +129,7 @@ const Testimonials = () => {
                     <Star key={i} className="h-4 w-4 text-yellow-400 fill-yellow-400" />
                   ))}
                 </div>
-                <p className="text-gray-600 italic">"{testimonial.quote}"</p>
+                <p className="text-gray-600 italic">{testimonial.quote}</p>
               </div>
 
               <div className="mt-6 grid grid-cols-2 gap-4 pt-6 border-t border-gray-100">

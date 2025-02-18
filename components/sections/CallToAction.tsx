@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ArrowRight, Mail, Calendar, PhoneCall } from 'lucide-react';
-
+import Link from 'next/link';
 const CallToAction = () => {
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -55,10 +55,10 @@ const CallToAction = () => {
               className="mt-8 bg-white text-blue-600 hover:bg-blue-50 w-full sm:w-auto"
               asChild
             >
-              <a href="/signup">
+              <Link href="/signup">
                 Start Free Trial
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
+              </Link>
             </Button>
           </div>
 

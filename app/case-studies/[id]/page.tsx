@@ -251,7 +251,7 @@ export default function CaseStudy({ params }: { params: { id: string } }) {
                     <p className="text-sm text-blue-200">{study.testimonial.position}</p>
                   </div>
                 </div>
-                <p className="italic text-blue-100">"{study.testimonial.quote}"</p>
+                <p className="italic text-blue-100">{study.testimonial.quote}</p>
               </div>
 
               {/* CTA */}

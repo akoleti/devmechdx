@@ -3,7 +3,7 @@
 import Layout from '@/components/Layout';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Users, Target, Shield, Lightbulb, Award, Building2 } from 'lucide-react';
+import { Users, Target, Shield, Lightbulb} from 'lucide-react';
 
 const stats = [
   { label: 'Clients Worldwide', value: '500+' },
@@ -90,7 +90,7 @@ export default function About() {
               Revolutionizing HVAC Management
             </h1>
             <p className="mt-6 text-xl text-gray-600">
-              We're on a mission to make buildings smarter, more efficient, and sustainable through innovative HVAC management solutions.
+              We are on a mission to make buildings smarter, more efficient, and sustainable through innovative HVAC management solutions.
             </p>
           </div>
 
@@ -119,7 +119,7 @@ export default function About() {
                   Our Mission
                 </h2>
                 <p className="mt-6 text-lg text-gray-600">
-                  At MechDX, we're dedicated to transforming how buildings manage their HVAC systems. Through innovative technology and data-driven solutions, we help organizations reduce energy consumption, lower operational costs, and create more comfortable environments.
+                  At MechDX, we are dedicated to transforming how buildings manage their HVAC systems. Through innovative technology and data-driven solutions, we help organizations reduce energy consumption, lower operational costs, and create more comfortable environments.
                 </p>
                 <p className="mt-4 text-lg text-gray-600">
                   Our commitment to sustainability drives us to develop solutions that not only benefit our clients but also contribute to a greener future.
@@ -238,7 +238,7 @@ export default function About() {
           <div className="mt-32 bg-[#0F62FE] rounded-2xl p-12 text-center text-white">
             <h2 className="text-3xl font-bold">Join Our Team</h2>
             <p className="mt-4 text-xl text-blue-100 max-w-2xl mx-auto">
-              We're always looking for talented individuals who share our passion for innovation and sustainability
+              We are always looking for talented individuals who share our passion for innovation and sustainability
             </p>
             <Button 
               variant="secondary"

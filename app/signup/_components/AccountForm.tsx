@@ -43,7 +43,7 @@ const COMPANY_SIZES = [
 ];
 
 interface AccountFormProps {
-  onSubmit: (data: any) => void;
+  onSubmit: (data: any) => Promise<void>;
   initialData?: any;
 }
 
@@ -66,7 +66,7 @@ export default function AccountForm({ onSubmit, initialData }: AccountFormProps)
     }
   });
 
-  const password = watch('password');
+
 
   const calculatePasswordStrength = (password: string): number => {
     let strength = 0;

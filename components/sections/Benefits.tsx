@@ -8,7 +8,7 @@ import {
   ArrowUp
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
+import Link from 'next/link';
 const benefits = [
   {
     name: 'Energy Efficiency',
@@ -128,13 +128,13 @@ const Benefits = () => {
 
         {/* Success Stories Link */}
         <div className="mt-16 text-center">
-          <a
+          <Link
             href="/case-studies"
             className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
           >
             View HVAC Success Stories
             <ArrowUp className="ml-2 h-4 w-4 rotate-45" />
-          </a>
+          </Link>
         </div>
       </div>
     </section>

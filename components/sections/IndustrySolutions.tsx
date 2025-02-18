@@ -1,10 +1,6 @@
 import { 
   Factory, 
-  HardHat, 
-  Heart, 
   Building2, 
-  Truck, 
-  Zap, 
   Server, 
   Building, 
   GraduationCap, 

@@ -1,8 +1,4 @@
 import { 
-  Settings, 
-  Calendar, 
-  ClipboardList, 
-  PackageSearch, 
   BarChart2, 
   Smartphone,
   Thermometer,

@@ -4,7 +4,7 @@ import Layout from '@/components/Layout';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, FileText, Download, BookOpen, FileSpreadsheet, Wrench } from 'lucide-react';
+import { Search, Download, BookOpen, FileSpreadsheet, Wrench } from 'lucide-react';
 
 const resources = {
   whitepapers: [

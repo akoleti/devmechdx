@@ -10,12 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-type ResourceItem = {
-  title: string;
-  date?: string;
-  type?: string;
-  duration?: string;
-};
+
 
 const resources = [
   {
@@ -161,7 +156,7 @@ const Resources = () => {
         {/* Search Help */}
         <div className="mt-20 text-center">
           <div className="bg-white rounded-2xl p-8 shadow-sm">
-            <h3 className="text-2xl font-semibold">Can't find what you need?</h3>
+            <h3 className="text-2xl font-semibold">Can&apos;t find what you need?</h3>
             <p className="mt-2 text-gray-600">
               Search our knowledge base or contact our support team
             </p>

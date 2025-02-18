@@ -69,7 +69,7 @@ export default function Terms() {
               Last updated: {lastUpdated}
             </p>
             <p className="mt-6 text-gray-600">
-              Please read these Terms of Service carefully before using MechDX's platform and services.
+              Please read these Terms of Service carefully before using MechDX&apos;s platform and services.
             </p>
           </div>
 
