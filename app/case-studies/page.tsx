@@ -123,13 +123,6 @@ export default function CaseStudies() {
                         </div>
                       ))}
                     </div>
-
-                    <Button className="w-full" asChild>
-                      <Link href={`/case-studies/${index + 1}`}>
-                        Read Full Case Study
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
                   </div>
                 </div>
 
