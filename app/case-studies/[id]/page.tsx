@@ -108,7 +108,7 @@ const caseStudies = [
 ];
 
 export default function CaseStudy({ params }: { params: { id: string } }) {
-  const study = caseStudies[parseInt(params.id) - 1];
+  const study = caseStudies[Number(params.id) - 1];
   
   if (!study) {
     return (
