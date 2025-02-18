@@ -7,6 +7,7 @@ import {
   Hotel 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 const industries = [
   {
@@ -20,6 +21,7 @@ const industries = [
     ],
     bgColor: 'bg-blue-50',
     iconColor: 'text-blue-600',
+    slug: 'commercial-buildings'
   },
   {
     name: 'Data Centers',
@@ -32,6 +34,7 @@ const industries = [
     ],
     bgColor: 'bg-purple-50',
     iconColor: 'text-purple-600',
+    slug: 'data-centers'
   },
   {
     name: 'Healthcare Facilities',
@@ -44,6 +47,7 @@ const industries = [
     ],
     bgColor: 'bg-green-50',
     iconColor: 'text-green-600',
+    slug: 'healthcare-facilities'
   },
   {
     name: 'Industrial Plants',
@@ -56,6 +60,7 @@ const industries = [
     ],
     bgColor: 'bg-orange-50',
     iconColor: 'text-orange-600',
+    slug: 'industrial-plants'
   },
   {
     name: 'Educational Institutions',
@@ -68,6 +73,7 @@ const industries = [
     ],
     bgColor: 'bg-red-50',
     iconColor: 'text-red-600',
+    slug: 'educational-institutions'
   },
   {
     name: 'Hotels Resorts',
@@ -80,8 +86,17 @@ const industries = [
     ],
     bgColor: 'bg-teal-50',
     iconColor: 'text-teal-600',
+    slug: 'hotels-resorts'
   },
 ];
+
+industries.forEach(industry => {
+  industry.slug = industry.name
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[&]/g, '')
+    .replace(/[^a-z0-9-]/g, '');
+});
 
 const IndustrySolutions = () => {
   return (
@@ -126,28 +141,7 @@ const IndustrySolutions = () => {
                 </div>
 
                 <div className="mt-8">
-                  <a 
-                    href={`/industries/${industry.name.replaceAll(' ','-').replaceAll('&','').toLowerCase()}`}
-                    className={cn(
-                      "inline-flex items-center text-sm font-medium",
-                      industry.iconColor
-                    )}
-                  >
-                    Learn more
-                    <svg
-                      className="ml-2 h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </a>
+
                 </div>
               </div>
             </div>
