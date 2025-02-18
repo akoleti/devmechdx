@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
-
+import Link from 'next/link';
 const caseStudies = [
   {
     title: "HVAC Optimization for Large Educational Campus",
@@ -125,10 +125,10 @@ export default function CaseStudies() {
                     </div>
 
                     <Button className="w-full" asChild>
-                      <a href={`/case-studies/${index + 1}`}>
+                      <Link href={`/case-studies/${index + 1}`}>
                         Read Full Case Study
                         <ArrowRight className="ml-2 h-4 w-4" />
-                      </a>
+                      </Link>
                     </Button>
                   </div>
                 </div>

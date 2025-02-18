@@ -107,8 +107,8 @@ const caseStudies = [
   }
 ];
 
-export default function CaseStudy({ params }: { params: { id: string } }) {
-  const study = caseStudies[Number(params.id) - 1];
+export default function CaseStudy({ params }: { params: { id: number } }) {
+  const study = caseStudies[params.id - 1];
   
   if (!study) {
     return (
