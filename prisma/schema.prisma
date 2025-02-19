@@ -1,0 +1,407 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ActivityType {
+  VIEW
+  CREATE
+  UPDATE
+  DELETE
+  SUBMIT
+  LOG
+}
+
+enum Role {
+  ROOT
+  ADMINISTRATOR
+  MANAGER
+  SUPERVISOR
+  TECHNICIAN
+  DISPATCHER
+  ESTIMATOR
+  CUSTOMER
+  USER
+}
+
+enum OrganizationPlan {
+  FREE
+  TRIAL
+  BASIC
+  PRO
+  ENTERPRISE
+}
+
+enum ResourceType {
+  USER
+  ORGANIZATION
+  LOCATION
+  EQUIPMENT
+  LOG_ENTRY
+  ALERT
+  API_KEY
+  AUDIT
+}
+
+enum OrganizationPlanStatus {
+  ACTIVE
+  INACTIVE
+  EXPIRED
+}
+
+enum AlertType {
+  USER_ALERT
+  USER_CREATION_ALERT
+  USER_DELETION_ALERT
+  ORGANIZATION_ALERT
+  ORGANIZATION_CREATION_ALERT
+  ORGANIZATION_DELETION_ALERT
+  LOCATION_ALERT
+  LOCATION_CREATION_ALERT
+  LOCATION_DELETION_ALERT
+  EQUIPMENT_ALERT
+  EQUIPMENT_CREATION_ALERT
+  EQUIPMENT_DELETION_ALERT
+  LOG_ENTRY_ALERT
+  LOG_ENTRY_CREATION_ALERT
+  LOG_ENTRY_DELETION_ALERT
+  LOG_ENTRY_UPDATE_ALERT
+  LOG_ENTRY_MESSAGE_ALERT
+  LOG_ENTRY_ERROR_ALERT
+  LOG_ENTRY_WARNING_ALERT
+  PERFORMANCE_ALERT
+
+}
+enum Action{
+  VIEW
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  FORGOT_PASSWORD
+}
+
+enum OrganizationType {
+  VENDOR
+  CUSTOMER
+}
+model User {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
+  name      String
+  email     String   @unique
+  emailVerified DateTime?
+  image String?
+  hashedPassword String
+  createdAt DateTime @default(now())
+  privacyPolicyAccepted Boolean @default(false)
+  role      Role    @default(USER)
+  termsAccepted Boolean @default(false)
+  archived Boolean @default(false)
+  recoveryToken String?
+  preferences Json?
+  lastLogin DateTime?
+  organization Organization[]
+  apiKeys ApiKeys[]
+  alerts Alerts[]  
+  audits Audits[]
+  contact Contact[]
+  activities Activities[]
+  logEntries LogEntries[]
+}
+
+
+model Organization {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
+  name      String
+  type OrganizationType
+  ownerId  String @db.Uuid
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  isDeleted Boolean @default(false)
+  isActive Boolean @default(true)
+  isVerified Boolean @default(false)
+  isArchived Boolean @default(false)
+  planId String @db.Uuid
+  plan Plan @relation(fields: [planId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users OrganizationUser[]
+  planStartDate DateTime?
+  planEndDate DateTime?
+  planStatus OrganizationPlanStatus @default(ACTIVE)
+  contacts Contact[]
+  activities Activities[]
+  vendors Vendor[]
+  locations Location[]
+  equipments Equipment[]
+  logEntries LogEntries[]
+}
+
+model Vendor {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
+  organizationId String @db.Uuid
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Plan {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
+  name      String
+  description String
+  price Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  isDeleted Boolean @default(false)
+  isActive Boolean @default(true)
+  isArchived Boolean @default(false)
+  organizations Organization[]
+}
+
+
+model OrganizationUser {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
+  organizationId String @db.Uuid
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  userId String @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  isDeleted Boolean @default(false)
+  isActive Boolean @default(true)
+  isVerified Boolean @default(false)
+  isArchived Boolean @default(false)
+}
+
+model Activities {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
+  resourceId      String
+  activityType      ActivityType
+  activityDate      DateTime
+  ts_created      DateTime @default(now())
+  ts_updated      DateTime @updatedAt
+  ts_deleted      DateTime?
+  byUserId      String @db.Uuid
+  byUser User @relation(fields: [byUserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  organizationId String @db.Uuid
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)    
+}
+
+model Alerts {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
+  type      AlertType
+  byUserId   String @db.Uuid
+  byUser User @relation(fields: [byUserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  organizationId String @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ApiKeys {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
+  name      String
+  key       String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId String @db.Uuid
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model Audits {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
+  action      Action
+  description String
+  resourceType ResourceType
+  occurredAt DateTime @default(now())
+  userId String @db.Uuid
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model Demos {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
+  name      String
+  email     String
+  phone     String
+  numberOfEmployees Int
+  organizationName String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Contact {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
+  userId String @db.Uuid
+  organizationId String @db.Uuid
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)  
+  firstName      String
+  lastName      String
+  email     String
+  phone String
+  verified Boolean @default(false)
+  archived Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  locations Location[]
+}
+
+model Location {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
+  name      String
+  address String
+  city String
+  state String
+  zip String
+  country String
+  contactId String @db.Uuid
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  organizationId String @db.Uuid
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  equipments Equipment[]
+  logEntries LogEntries[]
+}
+
+model Equipment {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
+  name      String
+  type      EquipmentType
+  archived Boolean @default(false)
+  serialNumber String
+  modelNumber String
+  refrigerantType String
+  nickname String
+  description String
+  locationId String @db.Uuid
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  organizationId String @db.Uuid
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  designInfo EquipmentDesignInfo[]
+  logEntries LogEntries[]
+}
+model EquipmentDesignInfo {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
+  equipmentId String @db.Uuid
+  equipment Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  designType EquipmentDesignInfoType
+  designTypeDescription String
+  designValue String
+  checklist Boolean @default(true)
+  logEntries LogEntries[]
+}
+
+
+model LogEntries {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
+  workOrderId String
+  archived Boolean @default(false)
+  organizationId String @db.Uuid
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  locationId String @db.Uuid
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  equipmentId String @db.Uuid
+  equipment Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  equipmentDesignInfoId String @db.Uuid
+  equipmentDesignInfo EquipmentDesignInfo @relation(fields: [equipmentDesignInfoId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  conclusion String
+  action Action
+  technicianId String @db.Uuid
+  technician User @relation(fields: [technicianId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  notes String
+  images String[]
+  video String
+  audio String
+  pdf String
+  verified Boolean @default(false)
+  locked Boolean @default(false)
+  lockedByUserId String @db.Uuid    
+  lockTS DateTime?
+  costAnalysis String
+  uploads Uploads[]
+}
+
+model Uploads {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
+  logEntryId String @db.Uuid
+  logEntry LogEntries @relation(fields: [logEntryId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  file String
+  fileName String
+  fileType String
+  fileSize Int
+  fileUrl String
+  resourceType ResourceType
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum EquipmentDesignInfoType {
+  Evaporator
+  Condenser
+  Motor
+  Compressor
+  Expansion_Valve
+  Fan
+  Cooling_Tower
+  Pump
+  Other
+}
+
+enum EquipmentType {
+  AIR_COOLED_CHILLER
+  WATER_COOLED_CHILLER
+  COOLING_TOWER
+  MRI_CHILLER
+  HOT_WATER_BOILER
+  OTHER
+}
+
+model CaseStudy {
+  id        Int      @id @default(autoincrement())
+  title     String
+  slug      String   @unique
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  industries CaseStudyIndustry[]
+}
+
+model Industry {
+  id        Int      @id @default(autoincrement())
+  name      String
+  slug      String   @unique
+  content   String
+  solutions IndustrySolution[]
+  caseStudies CaseStudyIndustry[]
+}
+
+model IndustrySolution {
+  id        Int      @id @default(autoincrement())
+  industryId Int
+  industry   Industry @relation(fields: [industryId], references: [id])
+  content    String
+} 
+
+model CaseStudyIndustry {
+  id        Int      @id @default(autoincrement())
+  caseStudyId Int
+  caseStudy   CaseStudy @relation(fields: [caseStudyId], references: [id])
+  industryId Int
+  industry   Industry @relation(fields: [industryId], references: [id])
+} 
