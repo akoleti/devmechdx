@@ -1,0 +1,75 @@
+openapi: 3.0.0
+info:
+  title: Your API Documentation
+  version: '1.0.0'
+  description: API documentation for your application
+servers:
+  - url: /api
+    description: API server
+paths:
+  /equipment-designs:
+    get:
+      summary: Get all equipment designs
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+    post:
+      summary: Create new equipment design
+      responses:
+        '201':
+          description: Successfully created
+
+  /equipment-designs/{id}:
+    get:
+      summary: Get equipment design by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          
+  /logs:
+    get:
+      summary: Get all logs
+      responses:
+        '200':
+          description: Successful response
+    post:
+      summary: Create new log
+      responses:
+        '201':
+          description: Successfully created
+
+  /uploads:
+    get:
+      summary: Get all uploads
+      responses:
+        '200':
+          description: Successful response
+    post:
+      summary: Upload new file
+      responses:
+        '201':
+          description: Successfully uploaded
+
+  /plans:
+    get:
+      summary: Get all plans
+      responses:
+        '200':
+          description: Successful response
+    post:
+      summary: Create new plan
+      responses:
+        '201':
+          description: Successfully created 
