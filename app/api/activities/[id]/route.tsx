@@ -6,12 +6,12 @@ import { error } from "console";
 
 export async function GET(
   request: Request,
-    { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const activity = await prisma.activity.findUnique({
       where: {
-        id: params.id,    
+        id: context.params.id,
       },
     });
 
