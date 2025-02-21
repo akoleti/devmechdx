@@ -4,16 +4,16 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
-    const locations = await prisma.location.findMany({
+    const equipments = await prisma.equipment.findMany({
       orderBy: {
         name: 'asc',
       },
     });
 
-    return NextResponse.json(locations);
+    return NextResponse.json(equipments);
   } catch (error) {
     return NextResponse.json(
-      { error: 'Failed to fetch locations' },
+      { error: 'Failed to fetch equipments' },
       { status: 500 }
     );
   }
@@ -23,15 +23,14 @@ export async function POST(request: Request) {
   try {
     const json = await request.json();
 
-    const location = await prisma.location.create({
+    const equipment = await prisma.equipment.create({
       data: json,
     });
 
-    return NextResponse.json(location);
+    return NextResponse.json(equipment);
   } catch (error) {
-    console.error('Error creating location:', error);
     return NextResponse.json(
-      { error: 'Failed to create location' },
+      { error: 'Failed to create equipment' },
       { status: 500 }
     );
   }

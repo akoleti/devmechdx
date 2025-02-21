@@ -12,7 +12,6 @@ export async function GET() {
 
     return NextResponse.json(industries, { status: 200 });
   } catch (error) {
-    console.error('Error fetching industries:', error);
     return NextResponse.json(
       { error: 'Failed to fetch industries' },
       { status: 500 }
