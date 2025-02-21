@@ -1,7 +1,6 @@
 'use server'
 
 import { PrismaClient } from "@prisma/client"
-import { DemoInsert } from "@/types"
 
 // Create a singleton instance of PrismaClient
 const globalForPrisma = globalThis as unknown as {
@@ -23,7 +22,7 @@ export async function createDemo(formData: FormData) {
     if (!name || !email || !phone || !numberOfEmployees || !organizationName) {
         throw new Error("Missing required fields");
     }
-    const demo = await prisma.demos.create({
+    const demo = await prisma.requestDemo.create({
         data: {
             name: name,
             email: email,

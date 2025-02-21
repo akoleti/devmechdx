@@ -112,12 +112,12 @@ model User {
   preferences Json?
   lastLogin DateTime?
   organization Organization[]
-  apiKeys ApiKeys[]
-  alerts Alerts[]  
-  audits Audits[]
+  apiKey ApiKey[]
+  alert Alert[]  
+  audit Audit[]
   contact Contact[]
-  activities Activities[]
-  logEntries LogEntries[]
+  activity Activity[]
+  logEntry LogEntry[]
 }
 
 
@@ -141,11 +141,11 @@ model Organization {
   planEndDate DateTime?
   planStatus OrganizationPlanStatus @default(ACTIVE)
   contacts Contact[]
-  activities Activities[]
+  activity Activity[]
   vendors Vendor[]
   locations Location[]
   equipments Equipment[]
-  logEntries LogEntries[]
+  logEntry LogEntry[]
 }
 
 model Vendor {
@@ -185,7 +185,7 @@ model OrganizationUser {
   isArchived Boolean @default(false)
 }
 
-model Activities {
+  model Activity {
   id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
   resourceId      String
   activityType      ActivityType
@@ -199,7 +199,7 @@ model Activities {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)    
 }
 
-model Alerts {
+model Alert {
   id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
   type      AlertType
   byUserId   String @db.Uuid
@@ -209,7 +209,7 @@ model Alerts {
   updatedAt DateTime @updatedAt
 }
 
-model ApiKeys {
+model ApiKey {
   id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
   name      String
   key       String   @unique
@@ -219,7 +219,7 @@ model ApiKeys {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
-model Audits {
+model Audit {
   id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
   action      Action
   description String
@@ -229,16 +229,7 @@ model Audits {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
-model Demos {
-  id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
-  name      String
-  email     String
-  phone     String
-  numberOfEmployees Int
-  organizationName String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
+
 
 model Contact {
   id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
@@ -272,7 +263,7 @@ model Location {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   equipments Equipment[]
-  logEntries LogEntries[]
+  logEntry LogEntry[]
 }
 
 model Equipment {
@@ -292,7 +283,7 @@ model Equipment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   designInfo EquipmentDesignInfo[]
-  logEntries LogEntries[]
+  logEntry LogEntry[]
 }
 model EquipmentDesignInfo {
   id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
@@ -302,11 +293,11 @@ model EquipmentDesignInfo {
   designTypeDescription String
   designValue String
   checklist Boolean @default(true)
-  logEntries LogEntries[]
+  logEntry LogEntry[]
 }
 
 
-model LogEntries {
+model LogEntry {
   id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
   workOrderId String
   archived Boolean @default(false)
@@ -334,13 +325,13 @@ model LogEntries {
   lockedByUserId String @db.Uuid    
   lockTS DateTime?
   costAnalysis String
-  uploads Uploads[]
+  upload Upload[]
 }
 
-model Uploads {
+model Upload {
   id        String   @id @default(dbgenerated("gen_random_uuid()"))  @db.Uuid
   logEntryId String @db.Uuid
-  logEntry LogEntries @relation(fields: [logEntryId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  logEntry LogEntry @relation(fields: [logEntryId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   file String
   fileName String
   fileType String
@@ -405,3 +396,16 @@ model CaseStudyIndustry {
   industryId Int
   industry   Industry @relation(fields: [industryId], references: [id])
 } 
+
+
+model RequestDemo {
+  id                 Int      @id @default(autoincrement())
+  name               String
+  email              String
+  phone              String?
+  numberOfEmployees  Int?
+  organizationName   String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+

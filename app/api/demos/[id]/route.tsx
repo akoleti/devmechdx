@@ -8,25 +8,22 @@ export async function GET(
     { params }: { params: { id: string } }
 ) {
   try {
-    const industry = await prisma.industry.findUnique({
+    const demo = await prisma.requestDemo.findUnique({
       where: {
         id: parseInt(params.id),    
       },
-      include: {
-        caseStudies: true, // Include related case studies if needed
-      },
     });
 
-    if (!industry) {
+    if (!demo) {
       return NextResponse.json(
-        { message: "Industry not found" },
+        { message: "Demo not found" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(industry);
+    return NextResponse.json(demo);
   } catch (error) {
-    console.error("Error fetching industry:", error);
+    console.error("Error fetching demo:", error);
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }
@@ -41,21 +38,23 @@ export async function PUT(
   try {
     const body = await request.json();
     
-    const updatedIndustry = await prisma.industry.update({
+    const updatedDemo = await prisma.requestDemo.update({
       where: {
         id: parseInt(params.id),
       },
       data: {
         name: body.name,
-        content: body.content,
-        slug: body.slug,
+        email: body.email,
+        phone: body.phone,
+        numberOfEmployees: body.numberOfEmployees,
+        organizationName: body.organizationName,
         // Add any other fields you want to update
       },
     });
 
-    return NextResponse.json(updatedIndustry);
+    return NextResponse.json(updatedDemo);
   } catch (error) {
-    console.error("Error updating industry:", error);
+    console.error("Error updating demo:", error);
     
     
 
