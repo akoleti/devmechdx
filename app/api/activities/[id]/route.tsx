@@ -9,25 +9,25 @@ export async function GET(
     { params }: { params: { id: string } }
 ) {
   try {
-    const plan = await prisma.plan.findUnique({
+    const activity = await prisma.activity.findUnique({
       where: {
         id: params.id,    
       },
     });
 
-    if (!plan) {
-      console.error("Plan not found");
+    if (!activity) {
+      console.error("Activity not found");
       return NextResponse.json(
-        { message: "Plan not found", notFound: true },
+        { message: "Activity not found", notFound: true },
         { status: 404 }
       );
     }
     
 
-    return NextResponse.json(plan);
+    return NextResponse.json(activity);
   } catch (error) {
     return NextResponse.json(
-        { message: "Plan not found", notFound: true },
+        { message: "Activity not found", notFound: true },
         { status: 404 }
       );
   }
@@ -40,25 +40,28 @@ export async function PUT(
   try {
     const body = await request.json();
     
-    const updatedPlan = await prisma.plan.update({
+    const updatedActivity = await prisma.activity.update({
       where: {
         id: params.id,
       },
       data: {
-        name: body.name,
-        description: body.description,
-        price: body.price,
+        resourceId: body.resourceId,
+        activityType: body.activityType,
+        activityDate: body.activityDate,
+        byUser: body.byUser,
+        organization: body.organization,
+        organizationId: body.organizationId,
         },
     });
 
-    if (!updatedPlan) {
+    if (!updatedActivity) {
       return NextResponse.json(
-        { message: "Plan not found", notFound: true },
+        { message: "Activity not found", notFound: true },
         { status: 404 }
       );
     }
     
-    return NextResponse.json(updatedPlan);
+    return NextResponse.json(updatedActivity);
   } catch (error) {
     return NextResponse.json(
       { message: "Internal server error" },
@@ -74,18 +77,18 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    const deletedPlan = await prisma.plan.delete({
+    const deletedActivity = await prisma.activity.delete({
       where: { id },
     });
 
-    if (!deletedPlan) {
+    if (!deletedActivity) {
       return NextResponse.json(
-        { message: "Plan not found", notFound: true },
+        { message: "Activity not found", notFound: true },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(deletedPlan);
+    return NextResponse.json(deletedActivity);
   } catch (error) {
     return NextResponse.json(
       { message: "Internal server error" },
@@ -98,22 +101,25 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const newPlan = await prisma.plan.create({
-      data: {
-        name: body.name,
-        description: body.description,
-        price: body.price,
+    const newActivity = await prisma.activity.create({
+      data: { 
+        resourceId: body.resourceId,
+        activityType: body.activityType,
+        activityDate: body.activityDate,
+        byUser: body.byUser,
+        organization: body.organization,
+        organizationId: body.organizationId,
       },
     });
 
-    if (!newPlan) {
+    if (!newActivity) {
       return NextResponse.json(
-        { message: "Failed to create plan", error: error    },
+        { message: "Failed to create activity", error: error    },
         { status: 400 }
       );
     }
 
-    return NextResponse.json(newPlan);
+    return NextResponse.json(newActivity);
   } catch (error) {
     return NextResponse.json(
       { message: "Internal server error" },
