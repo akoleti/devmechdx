@@ -1,17 +1,18 @@
 import { NextResponse } from "next/server";
 import {prisma} from '@/lib/prisma';
 import { error } from "console";
+import { NextRequest } from "next/server";
 
 
 
 export async function GET(
-  request: Request,
-  context: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
     const activity = await prisma.activity.findUnique({
       where: {
-        id: context.params.id,
+        id: params.id,
       },
     });
 
@@ -34,7 +35,7 @@ export async function GET(
 }
 
 export async function PUT(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -71,7 +72,7 @@ export async function PUT(
 } 
 
 export async function DELETE(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -97,7 +98,7 @@ export async function DELETE(
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
