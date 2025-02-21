@@ -10,10 +10,10 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const { id } = params;
+
     const activity = await prisma.activity.findUnique({
-      where: {
-        id: params.id,
-      },
+      where: { id },
     });
 
     if (!activity) {
@@ -39,12 +39,11 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    const { id } = params;
     const body = await request.json();
     
     const updatedActivity = await prisma.activity.update({
-      where: {
-        id: params.id,
-      },
+      where: { id },
       data: {
         resourceId: body.resourceId,
         activityType: body.activityType,
@@ -76,7 +75,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params;
+    const { id } = params;
 
     const deletedActivity = await prisma.activity.delete({
       where: { id },
