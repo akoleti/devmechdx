@@ -16,7 +16,6 @@ export async function GET(
     });
 
     if (!user) {
-      console.error("User not found");
       return NextResponse.json(
         { message: "User not found", notFound: true },
         { status: 404 }
@@ -27,8 +26,8 @@ export async function GET(
     return NextResponse.json(user);
   } catch (error) {
     return NextResponse.json(
-        { message: "User not found", notFound: true },
-        { status: 404 }
+       { message: "Internal server error" },
+        { status: 500 }
       );
   }
 }
