@@ -111,7 +111,8 @@ model User {
   recoveryToken String?
   preferences Json?
   lastLogin DateTime?
-  organization Organization[]
+  ownedOrganizations Organization[]
+  organizations OrganizationUser[]
   apiKey ApiKey[]
   alert Alert[]  
   audit Audit[]
@@ -176,6 +177,7 @@ model OrganizationUser {
   organizationId String @db.Uuid
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   userId String @db.Uuid
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime?
@@ -183,6 +185,7 @@ model OrganizationUser {
   isActive Boolean @default(true)
   isVerified Boolean @default(false)
   isArchived Boolean @default(false)
+  @@unique([userId, organizationId])
 }
 
   model Activity {
