@@ -11,12 +11,7 @@ async function main() {
     data: sa.users
   });
 
-  
-
-  
-
-  
-
+  console.log("Users created");
 }
 
 main();
