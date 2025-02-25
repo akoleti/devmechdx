@@ -78,35 +78,27 @@ export default function OrganizationsPage() {
   return (
     <>
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <LayoutGrid className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">DevMechDX</span>
-          </div>
+        <div className="container mx-auto px-4 py-4 flex justify-end">
           <div className="flex items-center gap-4">
             {organizations.length > 0 && (
               <Button 
                 onClick={() => router.push('/organizations/new')} 
                 size="sm"
-                className="flex items-center"
+                className="flex items-center ml-auto"
                 type="button"
               >
                 <PlusCircle className="mr-2 h-4 w-4" />
                 New Organization
               </Button>
             )}
-            {session?.user?.name && (
-              <span className="text-sm text-gray-600">Hello, {session.user.name}</span>
-            )}
+           
           </div>
         </div>
-      </header>
 
       {/* Main content */}
       <main className="container mx-auto py-12 px-4">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-3">Welcome to DevMechDX</h1>
+          <h1 className="text-4xl font-bold mb-3">Welcome to MechDX</h1>
           <p className="text-gray-600 text-lg mb-2">Please select an organization to continue</p>
           <p className="text-gray-500 text-sm max-w-md mx-auto">
             You have access to the following organizations. Choose one to set your working context.
