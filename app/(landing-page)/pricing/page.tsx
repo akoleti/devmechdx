@@ -1,10 +1,6 @@
-'use client';
-
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Check, HelpCircle } from 'lucide-react';
-import * as Tooltip from '@radix-ui/react-tooltip';
-import { useState } from 'react';
 import Link from 'next/link';
 
 // Add billing toggle types
@@ -122,8 +118,16 @@ const additionalFeatures = [
   }
 ];
 
-export default function Pricing() {
-  const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('monthly');
+export default async function Pricing({
+  searchParams
+}: {
+  searchParams: { billing?: string }
+}) {
+  // Ensure searchParams is properly awaited
+  const params = await Promise.resolve(searchParams);
+  
+  // Get billing period from URL params or default to monthly
+  const billingPeriod = (params.billing === 'annual' ? 'annual' : 'monthly') as BillingPeriod;
 
   const getPrice = (plan: typeof plans[0]) => {
     if (typeof plan.price === 'string') return plan.price;
@@ -158,8 +162,8 @@ export default function Pricing() {
           <div className="mt-12 flex justify-center">
             <div className="bg-white rounded-full p-1 shadow-sm">
               <div className="flex items-center space-x-4 px-4">
-                <button
-                  onClick={() => setBillingPeriod('monthly')}
+                <Link
+                  href="/pricing?billing=monthly"
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                     billingPeriod === 'monthly'
                       ? 'bg-[#0F62FE] text-white'
@@ -167,9 +171,9 @@ export default function Pricing() {
                   }`}
                 >
                   Monthly
-                </button>
-                <button
-                  onClick={() => setBillingPeriod('annual')}
+                </Link>
+                <Link
+                  href="/pricing?billing=annual"
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                     billingPeriod === 'annual'
                       ? 'bg-[#0F62FE] text-white'
@@ -180,7 +184,7 @@ export default function Pricing() {
                   <span className="ml-2 inline-block px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
                     Save 16%
                   </span>
-                </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -243,24 +247,17 @@ export default function Pricing() {
                       <Check className="h-5 w-5 text-[#0F62FE] flex-shrink-0" />
                       <span className="ml-3 text-gray-600">{feature}</span>
                       {featureExplanations[feature as FeatureKey] && (
-                        <Tooltip.Provider>
-                          <Tooltip.Root>
-                            <Tooltip.Trigger asChild>
-                              <button className="ml-1.5">
-                                <HelpCircle className="h-4 w-4 text-gray-400" />
-                              </button>
-                            </Tooltip.Trigger>
-                            <Tooltip.Portal>
-                              <Tooltip.Content
-                                className="bg-gray-900 text-white px-3 py-1.5 rounded text-sm max-w-xs"
-                                sideOffset={5}
-                              >
-                                {featureExplanations[feature as FeatureKey]}
-                                <Tooltip.Arrow className="fill-gray-900" />
-                              </Tooltip.Content>
-                            </Tooltip.Portal>
-                          </Tooltip.Root>
-                        </Tooltip.Provider>
+                        <div className="group relative ml-1.5">
+                          <span className="cursor-help">
+                            <HelpCircle className="h-4 w-4 text-gray-400" />
+                          </span>
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block">
+                            <div className="bg-gray-900 text-white px-3 py-1.5 rounded text-sm max-w-xs">
+                              {featureExplanations[feature as FeatureKey]}
+                              <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900" />
+                            </div>
+                          </div>
+                        </div>
                       )}
                     </li>
                   ))}
@@ -329,10 +326,10 @@ export default function Pricing() {
             </p>
             <div className="mt-8 flex justify-center gap-4">
               <Button variant="outline" asChild>
-                <a href="/faq">View FAQ</a>
+                <Link href="/faq">View FAQ</Link>
               </Button>
               <Button asChild>
-                <a href="/contact">Contact Sales</a>
+                <Link href="/contact">Contact Sales</Link>
               </Button>
             </div>
           </div>

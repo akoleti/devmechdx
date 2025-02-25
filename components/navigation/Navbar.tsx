@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import UserButton from '@/components/shared/UserButton';
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -56,7 +55,6 @@ const Navbar = () => {
             </select>
 
             {/* Login Button */}
-            <UserButton />
             
 
             {/* Get Started Button */}
@@ -113,7 +111,6 @@ const Navbar = () => {
               >
                 About
               </Link>
-              <UserButton />
               <Link
                 href="/demo"
                 className="block px-3 py-2 text-blue-600 font-medium hover:bg-blue-50 rounded-md"
