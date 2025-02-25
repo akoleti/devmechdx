@@ -9,8 +9,8 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 const signinDefaultValues = {
-    email: 'test@test.com',
-    password: 'test1234',
+    email: 'admin@example.com',
+    password: 'admin123',
 }
 
 

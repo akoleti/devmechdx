@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Building, ArrowRight, LayoutGrid, PlusCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Footer from '@/components/navigation/Footer';
+import useSessionStore from '@/app/stores/sessionStore';
+
 interface Organization {
   id: string;
   name: string;
@@ -16,28 +18,94 @@ interface Organization {
 }
 
 export default function OrganizationsPage() {
-  const { data: session, status } = useSession();
   const router = useRouter();
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  // Get session data from our store
+  const { status, user, organizations: storeOrganizations, setOrganizations, setCurrentOrganization } = useSessionStore();
+
+  console.log('status:', status);
+  console.log('user:', user);
+  console.log('organizations:', storeOrganizations);
+  
+  const [organizations, setLocalOrganizations] = useState<Organization[]>(storeOrganizations || []);
   const [loading, setLoading] = useState(false);
-
+  const [pageLoading, setPageLoading] = useState(true);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Set a timeout to ensure we eventually stop loading
   useEffect(() => {
-    // If not authenticated, redirect to login
-    if (status === 'unauthenticated') {
-      router.push('/login');
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
     }
+    
+    // Force exit loading state after 3 seconds
+    timeoutRef.current = setTimeout(() => {
+      if (pageLoading) {
+        setPageLoading(false);
+      }
+    }, 3000);
+    
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [pageLoading]);
+  
+  // Effect to handle organization data
+  useEffect(() => {
+    const fetchOrganizations = async () => {
+      try {
+        // First check if we have organizations in our store or session
+        if (storeOrganizations?.length > 0) {
+          setLocalOrganizations(storeOrganizations);
+          setPageLoading(false);
+          return;
+        }
+        
+        if (user?.organizations) {
+          const orgs = user.organizations;
+          setOrganizations(orgs);
+          setLocalOrganizations(orgs);
+          setPageLoading(false);
+          return;
+        }
 
-    // Get organizations from session when available
-    if (session?.user?.organizations) {
-      setOrganizations(session.user.organizations);
+        // If authenticated but no organizations yet, try getting them from the API
+        if (status === 'authenticated') {
+          const response = await fetch('/api/user/organizations');
+          if (response.ok) {
+            const data = await response.json();
+            const orgs = data.organizations || [];
+            setOrganizations(orgs);
+            setLocalOrganizations(orgs);
+          }
+          setPageLoading(false);
+        } else if (status === 'unauthenticated') {
+          // If not authenticated, we can exit loading state
+          setPageLoading(false);
+        }
+      } catch (error) {
+        console.error('Error fetching organizations:', error);
+        setPageLoading(false);
+      }
+    };
+
+    // Only run if we're authenticated or loading
+    if (status !== 'unauthenticated') {
+      fetchOrganizations();
+    } else {
+      setPageLoading(false);
     }
-  }, [session, status, router]);
+  }, [status, user, storeOrganizations, setOrganizations]);
+
+  // Handle navigation redirection when unauthenticated
+  
 
   const handleSelectOrganization = useCallback(async (organizationId: string) => {
     try {
-      setLoading(true);
-      console.log('Selecting organization:', organizationId);
-      
+      // If already loading, prevent multiple calls
+     
       // Call API to set the current organization
       const response = await fetch('/api/user/set-organization', {
         method: 'POST',
@@ -51,16 +119,19 @@ export default function OrganizationsPage() {
         throw new Error('Failed to select organization');
       }
 
-      // Redirect to dashboard after selecting organization
-      router.push('/dashboard');
+      // Update current organization in store
+      setCurrentOrganization(organizationId);
+      
+      // Navigate to dashboard
+      router.replace('/dashboard');
     } catch (error) {
       console.error('Error selecting organization:', error);
       setLoading(false);
     }
-  }, [router]);
+  }, [router, loading, setCurrentOrganization]);
 
   // Show loading state while session is loading
-  if (status === 'loading') {
+  if (status === 'loading' || pageLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
@@ -71,9 +142,7 @@ export default function OrganizationsPage() {
     );
   }
 
-  // For debugging
-  console.log('Session:', session);
-  console.log('Organizations:', organizations);
+ 
 
   return (
     <>

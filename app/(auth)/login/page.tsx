@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import SignInForm from './signin-Form';
-
+import useSessionStore from '@/app/stores/sessionStore';
 
 const Login = async (props: { 
   searchParams: Promise<{
@@ -12,6 +12,13 @@ const Login = async (props: {
   const { callbackUrl } = await props.searchParams
   const session = await auth()
   if (session) {
+    useSessionStore.setState({
+      status: 'authenticated',
+      user: session.user,
+      organizations: session.user.organizations,
+      initialized: true
+    })
+
     redirect(callbackUrl || '/organizations')
   }
 
