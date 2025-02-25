@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building, ArrowRight, LayoutGrid, PlusCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-
+import Footer from '@/components/navigation/Footer';
 interface Organization {
   id: string;
   name: string;
@@ -188,12 +188,7 @@ export default function OrganizationsPage() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t py-6">
-        <div className="container mx-auto px-4 text-center text-gray-500 text-sm">
-          <p>&copy; {new Date().getFullYear()} DevMechDX. All rights reserved.</p>
-        </div>
-      </footer>
+     <Footer />
     </>
   );
 }
