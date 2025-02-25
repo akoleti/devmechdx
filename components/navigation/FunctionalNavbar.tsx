@@ -15,6 +15,9 @@ import {
   BarChart3,
   Settings,
   HardDrive,
+  Users2Icon,
+  ShieldCheck,
+  Building,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -158,11 +161,30 @@ export default function FunctionalNavbar() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" /> Profile
+              <DropdownMenuItem asChild>
+                <Link href="/profile">
+                  <User className="mr-2 h-4 w-4" /> Profile
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" /> Settings
+              <DropdownMenuItem asChild>
+                <Link href="/organizations">
+                  <Building className="mr-2 h-4 w-4" /> Organizations
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/security">
+                  <ShieldCheck className="mr-2 h-4 w-4" /> Security
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/users">
+                  <Users2Icon className="mr-2 h-4 w-4" /> Users
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/settings">
+                  <Settings className="mr-2 h-4 w-4" /> Settings
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>Log out</DropdownMenuItem>
