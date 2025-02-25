@@ -45,12 +45,18 @@ const navigationItems = [
    
   },
   {
-    name: 'Logs',
-    href: '/logs',
+    name: 'Locations',
+    href: '/locations',
+   
   },
+  
   {
     name: 'Equipments',
     href: '/equipments',
+  },
+  {
+    name: 'Logs',
+    href: '/logs',
   },
   {
     name: 'Reports',
