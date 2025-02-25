@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 import {
   Search,
   Bell,
@@ -18,6 +19,7 @@ import {
   Users2Icon,
   ShieldCheck,
   Building,
+  LogOut,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -61,6 +63,11 @@ export default function FunctionalNavbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [hasNotifications, setHasNotifications] = useState(true);
   const pathname = usePathname();
+
+  // Handle logout function
+  const handleLogout = async () => {
+    await signOut({ redirect: true, callbackUrl: '/' });
+  };
 
   // Close the mobile menu when path changes
   useEffect(() => {
@@ -187,7 +194,12 @@ export default function FunctionalNavbar() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Log out</DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={handleLogout}
+                className="cursor-pointer"
+              >
+                <LogOut className="mr-2 h-4 w-4" /> Log out
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
