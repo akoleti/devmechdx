@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import FunctionalNavbar from '@/components/navigation/FunctionalNavbar';
-
+import Footer from '@/components/navigation/Footer';
 // Navigation links for the sidebar
 const navLinks = [
   { title: 'Dashboard', href: '/dashboard', icon: <BarChart3 className="h-5 w-5" /> },
@@ -62,6 +62,7 @@ export default function FunctionalLayout({
         <main className="flex-1 overflow-y-auto w-full">
           {children}
         </main>
+        <Footer />
       </div>
     </div>
   );
