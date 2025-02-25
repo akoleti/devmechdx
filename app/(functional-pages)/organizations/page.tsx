@@ -196,14 +196,17 @@ export default function OrganizationsPage() {
 // Helper functions to format organization data
 function formatOrgType(type?: string): string {
   if (!type) return 'Organization';
-  return type.charAt(0) + type.slice(1).toLowerCase();
+  return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
 }
 
-function formatRole(role: string): string {
+function formatRole(role?: string): string {
+  if (!role) return 'User';
   return role.charAt(0) + role.slice(1).toLowerCase();
 }
 
-function getRoleDescription(role: string): string {
+function getRoleDescription(role?: string): string {
+  if (!role) return 'Access to organization resources';
+  
   switch (role.toUpperCase()) {
     case 'ADMINISTRATOR':
       return 'Full control over organization settings and users';
@@ -220,7 +223,9 @@ function getRoleDescription(role: string): string {
   }
 }
 
-function getRoleBadgeVariant(role: string): 'default' | 'secondary' | 'destructive' | 'outline' {
+function getRoleBadgeVariant(role?: string): 'default' | 'secondary' | 'destructive' | 'outline' {
+  if (!role) return 'outline';
+  
   switch (role.toUpperCase()) {
     case 'ADMINISTRATOR':
       return 'destructive';
