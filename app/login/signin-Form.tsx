@@ -17,7 +17,7 @@ const signinDefaultValues = {
 export default function SignInForm() {
 
     const searchParams = useSearchParams()  
-    const callbackUrl = searchParams.get('callbackUrl') || '/'
+    const callbackUrl = searchParams.get('callbackUrl') || '/organizations'
 
     const [data, action] = useActionState(signInWithCredentials, {
         success: false,

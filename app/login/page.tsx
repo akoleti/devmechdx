@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
@@ -13,7 +12,7 @@ const Login = async (props: {
   const { callbackUrl } = await props.searchParams
   const session = await auth()
   if (session) {
-    redirect(callbackUrl || '/')
+    redirect(callbackUrl || '/organizations')
   }
 
 

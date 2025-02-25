@@ -5,9 +5,10 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { compareSync } from "bcrypt-ts-edge";
 import { Role } from "@prisma/client";
 import type { NextAuthConfig } from "next-auth";
+import { getUserOrganizations } from "./lib/auth/organization-context";
 
-export const config = {
-    adapter: PrismaAdapter(prisma),
+export const config: NextAuthConfig = {
+    adapter: PrismaAdapter(prisma) as any,
     pages: {
         signIn: "/login",
         signOut: "/logout",
@@ -37,12 +38,19 @@ export const config = {
                 if (user && user.hashedPassword) {
                 const isMatch = compareSync(credentials.password as string, user.hashedPassword);
                 if (isMatch) {
+                    // Get user's organizations
+                    const organizations = await getUserOrganizations(user.id);
+                    
                     return {
                         id: user.id,
                         email: user.email,
                         name: user.name,
                         role: user.role,
-
+                        organizations: organizations.map(org => ({
+                            id: org.organization.id,
+                            name: org.organization.name,
+                            role: org.role
+                        }))
                     };
                 }
             }
@@ -51,8 +59,19 @@ export const config = {
     }),
     ],
     callbacks: {
-        async session({ session, user,trigger, token } :any) {
+        async session({ session, user, trigger, token } :any) {
             session.user.id = token.id as string;
+            
+            // Include organizations in the session
+            if (token.organizations) {
+                session.user.organizations = token.organizations;
+            }
+            
+            // Include selected organization and role if available
+            if (token.currentOrganization) {
+                session.user.currentOrganization = token.currentOrganization;
+                session.user.currentRole = token.currentRole;
+            }
             
             if (trigger === "update") {
                 session.user.name = token.name as string;
@@ -61,7 +80,22 @@ export const config = {
             }
             return session;
         },
+        async jwt({ token, user, trigger, session } :any) {
+            if (user) {
+                token.id = user.id;
+                token.role = user.role;
+                token.organizations = user.organizations;
+            }
+            
+            // Handle organization selection via session update
+            if (trigger === "update" && session?.currentOrganization) {
+                token.currentOrganization = session.currentOrganization;
+                token.currentRole = session.currentRole;
+            }
+            
+            return token;
+        },
     },
-} satisfies NextAuthConfig;
+};
 
-export const { handlers, auth, signIn, signOut } = NextAuth(config);
+export const { handlers, auth, signIn, signOut } = NextAuth(config as any);

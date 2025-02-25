@@ -11,7 +11,8 @@
     "format": "prettier --write .",
     "postinstall": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "prisma:seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.7.4",
@@ -62,6 +63,7 @@
     "@vercel/speed-insights": "^1.1.0",
     "ably": "^1.2.26",
     "autoprefixer": "^10.4.20",
+    "bcrypt": "^5.1.1",
     "bcrypt-ts": "^5.0.3",
     "bcrypt-ts-edge": "^3.0.1",
     "class-variance-authority": "^0.7.1",
@@ -115,6 +117,7 @@
     "postcss": "^8",
     "prisma": "^6.4.0",
     "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }
