@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -56,9 +55,7 @@ const Navbar = () => {
             </select>
 
             {/* Login Button */}
-            <Button variant="ghost" asChild>
-              <Link href="/login">Login</Link>
-            </Button>
+            
 
             {/* Get Started Button */}
             <Button asChild>
@@ -113,12 +110,6 @@ const Navbar = () => {
                 className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md"
               >
                 About
-              </Link>
-              <Link
-                href="/login"
-                className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md"
-              >
-                Login
               </Link>
               <Link
                 href="/demo"

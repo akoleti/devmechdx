@@ -1,4 +1,5 @@
 import { Role, Prisma } from '@prisma/client';
+import { hashSync } from 'bcrypt-ts-edge';
 
 export const sa = 
 {
@@ -8,7 +9,7 @@ export const sa =
       email: "john.doe@example.com",
       emailVerified: new Date(),
       image: null,
-      hashedPassword: "password",
+      hashedPassword: hashSync("test123", 10),
       createdAt: new Date(),
       privacyPolicyAccepted: true,
       role: Role.ADMINISTRATOR,
@@ -24,7 +25,7 @@ export const sa =
       email: "doe@example.com",
       emailVerified: new Date(),
       image: null,
-      hashedPassword: "password",
+      hashedPassword: hashSync("test123", 10),
       createdAt: new Date(),
       privacyPolicyAccepted: true,
       role: Role.USER,
@@ -40,7 +41,7 @@ export const sa =
       email: "s.doe@example.com",
       emailVerified: new Date(),
       image: null,  
-      hashedPassword: "password",
+      hashedPassword: hashSync("test123", 10),
       createdAt: new Date(),
       privacyPolicyAccepted: true,
       role: Role.SUPERVISOR,
