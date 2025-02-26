@@ -4,9 +4,7 @@ import Layout from '@/components/Layout';
 
 const FeaturesPage = () => {
     return (
-        <Layout>
             <KeyFeatures />
-        </Layout>
     );
 };
 

@@ -81,7 +81,6 @@ const milestones = [
 
 export default function About() {
   return (
-    <Layout>
       <div className="min-h-screen bg-gray-50 pt-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Hero Section */}
@@ -250,6 +249,5 @@ export default function About() {
           </div>
         </div>
       </div>
-    </Layout>
   );
 } 

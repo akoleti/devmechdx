@@ -54,7 +54,6 @@ const caseStudies = [
 
 export default function CaseStudies() {
   return (
-    <Layout>
       <div className="bg-gray-50 min-h-screen pt-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
@@ -171,6 +170,5 @@ export default function CaseStudies() {
           </div>
         </div>
       </div>
-    </Layout>
   );
 } 

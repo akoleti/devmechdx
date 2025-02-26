@@ -31,11 +31,6 @@ const Footer = () => {
                   Pricing
                 </Link>
               </li>
-              <li>
-                <Link href="/solutions" className="text-gray-500 hover:text-blue-600">
-                  Solutions
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -53,11 +48,6 @@ const Footer = () => {
               <li>
                 <Link href="/contact" className="text-gray-500 hover:text-blue-600">
                   Contact
-                </Link>
-              </li>
-              <li>
-                <Link href="/careers" className="text-gray-500 hover:text-blue-600">
-                  Careers
                 </Link>
               </li>
             </ul>
