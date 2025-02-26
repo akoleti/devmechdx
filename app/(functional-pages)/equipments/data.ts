@@ -4,6 +4,15 @@ export interface Equipment {
   location: {
     id: string;
     name: string;
+    city?: string;
+    state?: string;
+  };
+  customer: {
+    id: string;
+    name: string;
+    contactName?: string;
+    contactEmail?: string;
+    contactPhone?: string;
   };
   serialNumber: string;
   model: string;
@@ -28,7 +37,16 @@ export const equipments: Equipment[] = [
     name: 'York YKF4507 Chiller #1',
     location: {
       id: '1',
-      name: 'Headquarters'
+      name: 'Headquarters',
+      city: 'Corpus Christi',
+      state: 'Texas'
+    },
+    customer: {
+      id: '105',
+      name: 'U.S. Navy',
+      contactName: 'John Reynolds',
+      contactEmail: 'j.reynolds@navy.mil',
+      contactPhone: '(361) 555-1234'
     },
     serialNumber: 'YK-45678-C1',
     model: 'YKF4507',
@@ -51,7 +69,16 @@ export const equipments: Equipment[] = [
     name: 'York YKF4507 Chiller #2',
     location: {
       id: '1',
-      name: 'Headquarters'
+      name: 'Headquarters',
+      city: 'Corpus Christi',
+      state: 'Texas'
+    },
+    customer: {
+      id: '105',
+      name: 'U.S. Navy',
+      contactName: 'John Reynolds',
+      contactEmail: 'j.reynolds@navy.mil',
+      contactPhone: '(361) 555-1234'
     },
     serialNumber: 'YK-45679-C2',
     model: 'YKF4507',
@@ -74,7 +101,16 @@ export const equipments: Equipment[] = [
     name: 'York YKF4507 Chiller #3',
     location: {
       id: '1',
-      name: 'Headquarters'
+      name: 'Headquarters',
+      city: 'Corpus Christi',
+      state: 'Texas'
+    },
+    customer: {
+      id: '112',
+      name: 'City of Corpus Christi',
+      contactName: 'Maria Rodriguez',
+      contactEmail: 'm.rodriguez@corpuschristi.gov',
+      contactPhone: '(361) 555-7890'
     },
     serialNumber: 'YK-45680-C3',
     model: 'YKF4507',
