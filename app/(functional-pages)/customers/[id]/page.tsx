@@ -12,8 +12,10 @@ import {
   FileText,
   PlusCircle,
   Plus,
-  QrCode
+  QrCode,
+  Settings
 } from 'lucide-react';
+import Link from 'next/link';
 
 // Mock customer data - in a real app this would come from an API
 const customers: Customer[] = [
@@ -137,9 +139,9 @@ export default function CustomerDetail({ params }: { params: Promise<{ id: strin
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-2">
       {/* Header with customer info and action buttons */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+      <div className="flex flex-col md:flex-row bg-gray-100 justify-between items-start md:items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold">{customer.name}</h1>
           <div className="text-gray-600">
@@ -166,6 +168,11 @@ export default function CustomerDetail({ params }: { params: Promise<{ id: strin
         <Button className="bg-white text-blue-600 border border-blue-600 hover:bg-blue-50">
           <Bell size={16} className="mr-2" /> Subscribe to Alerts
         </Button>
+        <Link href={`/customers/${customerId}/settings`}>
+          <Button className="bg-white text-gray-600 border border-gray-300 hover:bg-gray-50">
+            <Settings size={16} className="mr-2" /> Settings
+          </Button>
+        </Link>
       </div>
 
       {/* Main content grid */}
