@@ -14,6 +14,7 @@ import {
   Percent,
 } from 'lucide-react';
 import { Equipment } from '../page';
+import Link from 'next/link';
 
 interface EquipmentGridProps {
   equipment: Equipment[];
@@ -61,7 +62,12 @@ function EquipmentGrid({ equipment }: EquipmentGridProps) {
           <CardContent className="p-4">
             {/* Top row with equipment name and action icons */}
             <div className="flex justify-between items-center mb-3">
-              <h3 className="text-lg font-semibold text-blue-600 truncate pr-2">{item.name}</h3>
+              <Link 
+                href={`/equipments/${item.id}`} 
+                className="text-lg font-semibold text-blue-600 truncate pr-2 hover:text-blue-800 hover:underline"
+              >
+                {item.name}
+              </Link>
               
               {/* Action Icons */}
               <div className="flex space-x-2 shrink-0">

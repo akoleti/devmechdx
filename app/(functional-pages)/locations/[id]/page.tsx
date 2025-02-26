@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { use } from 'react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import DonutChart from '../../dashboard/components/DonutChart';
 
 // Import types
 import { Location, LocationStatus } from '../page';
+import { equipments } from '@/app/(functional-pages)/equipments/data';
 
 // Mock data for locations (copied directly to avoid import issues)
 const locations: Location[] = [
@@ -63,9 +64,11 @@ const locations: Location[] = [
   }
 ];
 
-export default function LocationDetail() {
-  const params = useParams();
-  const locationId = typeof params.id === 'string' ? parseInt(params.id) : -1;
+export default function LocationDetail({ params }: { params: Promise<{ id: string }> }) {
+  // Properly unwrap params using React.use()
+  const unwrappedParams = use(params);
+  const locationId = typeof unwrappedParams.id === 'string' ? parseInt(unwrappedParams.id) : -1;
+  
   const [location, setLocation] = useState<Location | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTimeframe, setActiveTimeframe] = useState<string>('Month');
@@ -104,28 +107,6 @@ export default function LocationDetail() {
         return 'bg-blue-500';
     }
   };
-
-  // Mock equipment data for the equipment breakdown section
-  const equipments = [
-    {
-      id: 'YKF4507-1',
-      name: 'York YKF4507 Chiller #1',
-      cost: 11385.39,
-      chart: '/path/to/chart1.png',
-    },
-    {
-      id: 'YKF4507-2',
-      name: 'York YKF4507 Chiller #2',
-      cost: 43690.81,
-      chart: '/path/to/chart2.png',
-    },
-    {
-      id: 'YKF4507-3',
-      name: 'York YKF4507 Chiller #3',
-      cost: 6661.03,
-      chart: '/path/to/chart3.png',
-    },
-  ];
 
   // Data for the Logged/Unlogged Equipment donut chart
   const donutData = {
@@ -418,8 +399,10 @@ export default function LocationDetail() {
               <CardContent className="p-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-medium">{equipment.name}</h3>
-                    <p className="text-red-600 font-medium">${equipment.cost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    <Link href={`/equipments/${equipment.id}`} className="font-medium text-blue-600 hover:text-blue-800 hover:underline">
+                      {equipment.name}
+                    </Link>
+                    <p className="text-red-600 font-medium">${equipment.inefficiencyCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-600">{index + 4}</span>
