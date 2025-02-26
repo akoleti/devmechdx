@@ -575,7 +575,10 @@ export default function LogDetail({ params }: { params: Promise<{ id: string }> 
   return (
     <div className="flex flex-col h-full">
       {/* Top Action Bar */}
-      <div className="bg-white border-b border-gray-200 px-4 py-2 flex justify-between items-center">
+      <div className="container mx-auto px-4 py-2 flex justify-between items-center">
+        <div>
+          {/* Left side - empty */}
+        </div>
         <div className="flex items-center space-x-3">
           <Button 
             variant="outline" 
@@ -626,8 +629,15 @@ export default function LogDetail({ params }: { params: Promise<{ id: string }> 
             <span className="text-xs">Create New</span>
           </Button>
         </div>
-        <div>
-          <Button 
+      </div>
+      
+      {/* Log Status Bar */}
+      <div className="container mx-auto bg-blue-200 px-4 py-2 flex justify-between items-center text-sm">
+        <div className="flex items-center gap-2">
+          <Lock size={16} />
+          <span>This Log Was Completed and Locked on 2/25/2025 by Cliff Blair</span>
+        </div>
+        <Button 
             variant="outline" 
             size="sm" 
             className={`${isLocked ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-amber-50 text-amber-800 hover:bg-amber-100"}`}
@@ -635,22 +645,10 @@ export default function LogDetail({ params }: { params: Promise<{ id: string }> 
           >
             {isLocked ? "UNLOCK" : "LOCK"}
           </Button>
-        </div>
-      </div>
-      
-      {/* Log Status Bar */}
-      <div className="bg-blue-600 text-white px-4 py-2 flex justify-between items-center text-sm">
-        <div className="flex items-center gap-2">
-          <Lock size={16} />
-          <span>This Log Was Completed and Locked on 2/25/2025 by Cliff Blair</span>
-        </div>
-        <Button variant="ghost" size="sm" className="text-white hover:bg-blue-700">
-          <span className="text-xs">UNLOCK</span>
-        </Button>
       </div>
 
       {/* Alert Bar */}
-      <div className="bg-white border-b border-gray-200 px-4 py-2 flex justify-between items-center">
+      <div className="container mx-auto px-4 py-2 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <span className="text-sm">No Alert for this Log</span>
         </div>
@@ -664,20 +662,7 @@ export default function LogDetail({ params }: { params: Promise<{ id: string }> 
 
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Link href="/logs" className="text-blue-600 hover:text-blue-800 flex items-center gap-1">
-              <ArrowLeft size={16} />
-              <span>Back to Logs</span>
-            </Link>
-          </div>
-          <div className="flex justify-between items-start">
-            <div>
-              <h1 className="text-2xl font-bold">{log.title} - {log.equipment.name}</h1>
-              <p className="text-gray-600">Date: {log.date} • Technician: {log.technician}</p>
-            </div>
-          </div>
-        </div>
+       
 
         {/* Main content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
