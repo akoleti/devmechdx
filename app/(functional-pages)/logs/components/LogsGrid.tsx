@@ -10,6 +10,7 @@ import {
   EyeOff,
 } from 'lucide-react';
 import { Log } from '../page';
+import Link from 'next/link';
 
 interface LogsGridProps {
   logs: Log[];
@@ -34,9 +35,12 @@ function LogsGrid({ logs }: LogsGridProps) {
           <CardContent className="p-4">
             {/* Top row with equipment name and action icons */}
             <div className="flex justify-between items-center mb-3">
-              <h3 className="text-lg font-semibold text-blue-600 truncate">
+              <Link 
+                href={`/logs/${log.id}`} 
+                className="text-lg font-semibold text-blue-600 hover:text-blue-800 hover:underline truncate"
+              >
                 {log.equipmentName} - {log.equipmentId}
-              </h3>
+              </Link>
               
               {/* Action Icons */}
               <div className="flex space-x-2">

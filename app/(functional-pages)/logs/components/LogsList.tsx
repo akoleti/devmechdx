@@ -10,6 +10,7 @@ import {
   EyeOff,
 } from 'lucide-react';
 import { Log } from '../page';
+import Link from 'next/link';
 
 interface LogsListProps {
   logs: Log[];
@@ -34,9 +35,12 @@ function LogsList({ logs }: LogsListProps) {
           <CardContent className="p-4">
             {/* Top row with equipment name and action icons */}
             <div className="flex justify-between items-center mb-3 w-full">
-              <h3 className="text-lg font-semibold text-blue-600">
+              <Link 
+                href={`/logs/${log.id}`} 
+                className="text-lg font-semibold text-blue-600 hover:text-blue-800 hover:underline"
+              >
                 {log.equipmentName} - {log.equipmentId} {log.equipmentName} #{log.equipmentId.slice(-1)}
-              </h3>
+              </Link>
               
               {/* Action Icons at the absolute far right */}
               <div className="flex space-x-2">

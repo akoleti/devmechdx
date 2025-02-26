@@ -68,7 +68,7 @@ export default function EquipmentDetail({ params }: { params: Promise<{ id: stri
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-4">
-          <Link href={`/equipments/`} className="text-blue-600 hover:text-blue-800 flex items-center gap-1">
+          <Link href={`/equipments`} className="text-blue-600 hover:text-blue-800 flex items-center gap-1">
             <ArrowLeft size={16} />
             <span>Back to Equipments</span>
           </Link>
@@ -423,7 +423,12 @@ export default function EquipmentDetail({ params }: { params: Promise<{ id: stri
                     <div className="border-b pb-3">
                       <div className="flex items-center gap-2">
                         <Info size={16} className="text-blue-600" />
-                        <p className="font-medium">Performance Log</p>
+                        <Link 
+                          href="/logs/1"
+                          className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                        >
+                          Performance Log
+                        </Link>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                         <CalendarDays size={14} />
@@ -436,7 +441,12 @@ export default function EquipmentDetail({ params }: { params: Promise<{ id: stri
                     <div className="border-b pb-3">
                       <div className="flex items-center gap-2">
                         <Info size={16} className="text-blue-600" />
-                        <p className="font-medium">Operational Log</p>
+                        <Link 
+                          href="/logs/2"
+                          className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                        >
+                          Operational Log
+                        </Link>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                         <CalendarDays size={14} />
