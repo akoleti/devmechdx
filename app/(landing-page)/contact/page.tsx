@@ -57,7 +57,6 @@ export default function Contact() {
 
   if (submitted) {
     return (
-      <Layout>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
           <div className="max-w-md w-full bg-white rounded-lg shadow p-8 text-center">
             <div className="mb-4 text-green-500">
@@ -74,12 +73,10 @@ export default function Contact() {
             </Button>
           </div>
         </div>
-      </Layout>
     );
   }
 
   return (
-    <Layout>
       <div className="min-h-screen bg-gray-50 pt-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
@@ -207,6 +204,5 @@ export default function Contact() {
           </div>
         </div>
       </div>
-    </Layout>
   );
 } 

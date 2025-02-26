@@ -41,7 +41,6 @@ export default function RequestDemo() {
 
   if (submitted) {
     return (
-      <Layout>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
           <div className="max-w-md w-full bg-white rounded-lg shadow p-8 text-center">
             <div className="mb-4 text-green-500">
@@ -58,12 +57,11 @@ export default function RequestDemo() {
             </Button>
           </div>
         </div>
-      </Layout>
+      
     );
   }
 
   return (
-    <Layout>
       <div className="min-h-screen bg-gray-50 py-32">
         <div className="max-w-2xl mx-auto px-4">
           <div className="bg-white rounded-lg shadow p-8">
@@ -155,6 +153,5 @@ export default function RequestDemo() {
           </div>
         </div>
       </div>
-    </Layout>
   );
 } 
