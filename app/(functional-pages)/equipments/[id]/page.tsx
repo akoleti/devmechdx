@@ -68,9 +68,9 @@ export default function EquipmentDetail({ params }: { params: Promise<{ id: stri
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-4">
-          <Link href={`/locations/${equipment.location.id}`} className="text-blue-600 hover:text-blue-800 flex items-center gap-1">
+          <Link href={`/equipments/`} className="text-blue-600 hover:text-blue-800 flex items-center gap-1">
             <ArrowLeft size={16} />
-            <span>Back to {equipment.location.name}</span>
+            <span>Back to Equipments</span>
           </Link>
         </div>
         <div className="flex justify-between items-start">
