@@ -10,6 +10,7 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
+import Link from 'next/link';
 
 interface CustomerStats {
   locations: number;
@@ -57,7 +58,9 @@ function CustomersList({ customers }: CustomersListProps) {
           <CardContent className="p-4">
             {/* Top row with name and action icons */}
             <div className="flex justify-between items-center mb-3 w-full">
-              <h3 className="text-lg font-semibold text-blue-600">{customer.name}</h3>
+              <Link href={`/customers/${customer.id}`} className="text-lg font-semibold text-blue-600 hover:underline">
+                {customer.name}
+              </Link>
               
               {/* Action Icons at the absolute far right */}
               <div className="flex space-x-2">

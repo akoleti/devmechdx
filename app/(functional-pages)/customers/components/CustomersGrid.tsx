@@ -11,6 +11,7 @@ import {
   EyeOff,
 } from 'lucide-react';
 import { Customer } from './CustomersList';
+import Link from 'next/link';
 
 interface CustomersGridProps {
   customers: Customer[];
@@ -34,7 +35,9 @@ function CustomersGrid({ customers }: CustomersGridProps) {
         <Card key={customer.id} className="border border-gray-200 hover:shadow-md transition-shadow">
           <CardContent className="p-4">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="text-lg font-semibold text-blue-600">{customer.name}</h3>
+              <Link href={`/customers/${customer.id}`} className="text-lg font-semibold text-blue-600 hover:underline">
+                {customer.name}
+              </Link>
               
               <div className="flex space-x-2">
                 <button className="text-gray-500 hover:text-gray-700" aria-label="Settings">
