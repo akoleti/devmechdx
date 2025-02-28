@@ -2,6 +2,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
 import { Toaster } from 'sonner';
+import HydrationFix from './providers/HydrationFix';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -22,10 +23,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Providers>
-          {children}
-          <Toaster position="top-center" />
-        </Providers>
+        <HydrationFix>
+          <Providers>
+            {children}
+            <Toaster position="top-center" />
+          </Providers>
+        </HydrationFix>
       </body>
     </html>
   );

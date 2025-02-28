@@ -2,25 +2,81 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 
 export default function Signup() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
-    company: '',
     password: '',
     confirmPassword: '',
   });
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+  
+    
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
+      newErrors.email = 'Email is invalid';
+    }
+    
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
+    }
+    
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setIsLoading(true);
-    // Add your signup logic here
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
-    setIsLoading(false);
+    try {
+      // Make API call to register user
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to register');
+      }
+      
+      toast.success('Registration successful! Please log in.');
+      router.push('/login');
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to create account');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -40,22 +96,8 @@ export default function Signup() {
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
             <form className="space-y-6" onSubmit={handleSubmit}>
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                  Full name
-                </label>
-                <div className="mt-1">
-                  <Input
-                    id="name"
-                    name="name"
-                    type="text"
-                    autoComplete="name"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  />
-                </div>
-              </div>
+              
+             
 
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -71,25 +113,11 @@ export default function Signup() {
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
+                  {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
                 </div>
               </div>
 
-              <div>
-                <label htmlFor="company" className="block text-sm font-medium text-gray-700">
-                  Company name
-                </label>
-                <div className="mt-1">
-                  <Input
-                    id="company"
-                    name="company"
-                    type="text"
-                    autoComplete="organization"
-                    required
-                    value={formData.company}
-                    onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                  />
-                </div>
-              </div>
+            
 
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
@@ -105,6 +133,7 @@ export default function Signup() {
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   />
+                  {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
                 </div>
               </div>
 
@@ -122,6 +151,7 @@ export default function Signup() {
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                   />
+                  {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
                 </div>
               </div>
 

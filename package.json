@@ -54,6 +54,7 @@
     "@t3-oss/env-nextjs": "^0.12.0",
     "@tanstack/react-query": "^5.62.8",
     "@tanstack/react-table": "^8.20.6",
+    "@types/bcrypt": "^5.0.2",
     "@types/ms": "^0.7.34",
     "@types/node": "^20.11.5",
     "@types/react": "^18.2.48",
