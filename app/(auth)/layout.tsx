@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { LayoutGrid } from 'lucide-react';
 import Footer from '@/components/navigation/Footer';
 import Image from 'next/image';
 export default function AuthLayout({

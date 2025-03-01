@@ -19,7 +19,6 @@ export default function SuccessPage() {
   }
 
   return (
-    <Layout>
       <div className="min-h-screen bg-gray-50 pt-32">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
@@ -51,6 +50,5 @@ export default function SuccessPage() {
           </div>
         </div>
       </div>
-    </Layout>
   );
 } 
