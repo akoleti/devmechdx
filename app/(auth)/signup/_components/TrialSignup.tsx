@@ -147,8 +147,7 @@ export default function TrialSignup({ plan, trialDays, features }: TrialSignupPr
   if (!isClient) return null;
 
   return (
-    <Layout>
-      <div className="min-h-screen bg-gray-50 pt-32">
+        <div className="min-h-screen bg-gray-50 pt-32">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link 
             href="/pricing"
@@ -277,6 +276,5 @@ export default function TrialSignup({ plan, trialDays, features }: TrialSignupPr
           </div>
         </div>
       </div>
-    </Layout>
   );
 } 
