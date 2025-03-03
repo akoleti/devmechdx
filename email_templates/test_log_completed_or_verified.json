@@ -1,0 +1,9 @@
+{
+  "Source": "MechDX <no-reply@mechdx.com>",
+  "Template": "LogCompletedOrVerified",
+  "ConfigurationSetName": "DefaultConfigSet",
+  "Destination": {
+    "ToAddresses": [ "zane@whitebayassets.com" ]
+  },
+  "TemplateData": "{ \"UsersName\": \"J. Zane Cook\", \"CurrentYear\": \"2022\", \"ThisEmailID\": \"12345\", \"CurrentAction\": \"Verified\", \"EquipmentName\": \"Water Cooled Chiller - Chiller #1\", \"LocationName\": \"Kolda Elementary\", \"CustomerName\": \"Corpus Christi ISD\", \"NotificationID\": \"12345\", \"EfficiencyPercentage\": \"89.5\", \"EfficiencyCost\": \"2,984.23\", \"TechnicianName\": \"Johnny B Good\", \"ActionToBeTaken\": \"Good Question\", \"Conclusion\": \"Indeed there was a conclusion made\" }"
+}

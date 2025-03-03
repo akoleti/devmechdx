@@ -1,0 +1,9 @@
+{
+  "Source": "MechDX <no-reply@mechdx.com>",
+  "Template": "SetupNotificationsRequest",
+  "ConfigurationSetName": "DefaultConfigSet",
+  "Destination": {
+    "ToAddresses": [ "dan@protechmech.com" ]
+  },
+  "TemplateData": "{ \"UsersName\": \"Dan Whiteside\", \"InitiatorUser\": \"J. Zane Cook\", \"CurrentYear\": \"2022\", \"ThisEmailID\": \"12345\" }"
+}

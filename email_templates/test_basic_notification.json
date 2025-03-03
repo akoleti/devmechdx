@@ -1,0 +1,9 @@
+{
+  "Source": "MechDX <no-reply@mechdx.com>",
+  "Template": "BasicNotification",
+  "ConfigurationSetName": "DefaultConfigSet",
+  "Destination": {
+    "ToAddresses": [ "zane@whitebayassets.com", "dan@protechmech.com", "johnny@protechmech.com", "mike@protechmech.com", "fgarcia@protechmech.com", "eibarra@protechmech.com", "marcos@protechmech.com", "ccollins@protechmech.com", "jcastillo@protechmech.com", "joseph@protechmech.com", "troy@protechmech.com", "revans@protechmech.com", "malaniz@protechmech.com", "grios@protechmech.com", "eurbina@protechmech.com", "jsanchez@protechmech.com", "zcook@protechmech.com", "bryan@protechmech.com", "bgarcia@protechmech.com", "jpickard@protechmech.com" ]
+  },
+  "TemplateData": "{ \"CurrentYear\": \"2022\", \"ThisEmailID\": \"12345\", \"Subject\": \"Notification System Reboot\", \"Body\": \"Following a recent server upgrade, users may have experienced a large quantity of text messages or emails sent at around 9:30 this morning. If you received any of these messages, please ignore them as you likely already received them in the past. Sincerely, MechDX Administrator.\" }"
+}

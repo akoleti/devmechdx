@@ -13,7 +13,7 @@ export const config: NextAuthConfig = {
         signIn: "/login",
         signOut: "/logout",
         error: "/login",
-        verifyRequest: "/verify-request",
+        verifyRequest: "/verify-email",
         newUser: "/signup",
     },
     session: {
@@ -35,28 +35,44 @@ export const config: NextAuthConfig = {
                 const user = await prisma.user.findFirst({
                     where: { email: credentials.email },
                 });
+                
+                // Check if user exists and has a password
                 if (user && user.hashedPassword) {
-                const isMatch = compareSync(credentials.password as string, user.hashedPassword);
-                if (isMatch) {
-                    // Get user's organizations
-                    const organizations = await getUserOrganizations(user.id);
+                    // Check if email is verified
+                    if (!user.emailVerified) {
+                        // The user exists but email is not verified
+                        // We will handle this by throwing an error that we can check for in the signIn function
+                        throw new Error("EMAIL_NOT_VERIFIED");
+                    }
                     
-                    return {
-                        id: user.id,
-                        email: user.email,
-                        name: user.name,
-                        role: user.role,
-                        organizations: organizations.map(org => ({
-                            id: org.organization.id,
-                            name: org.organization.name,
-                            role: org.role
-                        }))
-                    };
+                    // Email is verified, proceed with password check
+                    const isMatch = compareSync(credentials.password as string, user.hashedPassword);
+                    if (isMatch) {
+                        // Get user's organizations
+                        const organizations = await getUserOrganizations(user.id);
+                        
+                        // Update last login time
+                        await prisma.user.update({
+                            where: { id: user.id },
+                            data: { lastLogin: new Date() },
+                        });
+                        
+                        return {
+                            id: user.id,
+                            email: user.email,
+                            name: user.name,
+                            role: user.role,
+                            organizations: organizations.map(org => ({
+                                id: org.organization.id,
+                                name: org.organization.name,
+                                role: org.role
+                            }))
+                        };
+                    }
                 }
+                return null;
             }
-            return null;
-        },
-    }),
+        }),
     ],
     callbacks: {
         async session({ session, user, trigger, token } :any) {

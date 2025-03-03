@@ -1,0 +1,9 @@
+{
+  "Source": "MechDX <no-reply@mechdx.com>",
+  "Template": "VerifyEmail",
+  "ConfigurationSetName": "DefaultConfigSet",
+  "Destination": {
+    "ToAddresses": [ "zane@whitebayassets.com" ]
+  },
+  "TemplateData": "{ \"UsersName\": \"J. Zane Cook\", \"CurrentYear\": \"2022\", \"ThisEmailID\": \"12345\" }"
+}

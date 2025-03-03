@@ -1,0 +1,9 @@
+{
+  "Source": "MechDX <no-reply@mechdx.com>",
+  "Template": "AccountRecovery",
+  "ConfigurationSetName": "DefaultConfigSet",
+  "Destination": {
+    "ToAddresses": [ "zane@whitebayassets.com" ]
+  },
+  "TemplateData": "{ \"CurrentYear\": \"2022\", \"ThisEmailID\": \"12345\", \"UsersName\": \"J. Zane Cook\", \"RecoveryCode\": \"123456\" }"
+}

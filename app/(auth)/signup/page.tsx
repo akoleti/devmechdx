@@ -69,8 +69,15 @@ export default function Signup() {
         throw new Error(data.message || 'Failed to register');
       }
       
-      toast.success('Registration successful! Please log in.');
-      router.push('/login');
+      // Check if email verification is required
+      if (data.requiresVerification) {
+        toast.success('Registration successful! Please check your email to verify your account.');
+        // Redirect to verification page
+        router.push(`/verify-email?email=${encodeURIComponent(formData.email)}&justRegistered=true`);
+      } else {
+        toast.success('Registration successful! Please log in.');
+        router.push('/login');
+      }
     } catch (error) {
       console.error('Registration error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to create account');
