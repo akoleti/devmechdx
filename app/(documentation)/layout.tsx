@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { LayoutGrid, Menu, X, Book, FileText, Code, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
 
 // Documentation sidebar links
 const sidebarLinks = [
