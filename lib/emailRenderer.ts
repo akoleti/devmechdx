@@ -12,6 +12,8 @@ import NewMemberAddedEmail from "@/emails/templates/newMemberAddedEmail";
 import MemberDeactivatedEmail from "@/emails/templates/memberDeactivatedEmail";
 import DemoSignupEmail from "@/emails/templates/demoSignupEmail";
 import PlanSignupEmail from "@/emails/templates/planSignupEmail";
+import DemoRequestConfirmation from "@/emails/templates/demoRequestConfirmation";
+import DemoRequestNotification from "@/emails/templates/demoRequestNotification";
 
 export type EmailTemplate = {
   subject: string;
@@ -66,6 +68,14 @@ export async function renderEmailTemplate(
     case "planSignup":
       component = PlanSignupEmail(props);
       subject = `Welcome to DevMechDX ${props.planName} Plan!`;
+      break;
+    case "demoRequestConfirmation":
+      component = DemoRequestConfirmation(props);
+      subject = "Your DevMechDX Demo Request";
+      break;
+    case "demoRequestNotification":
+      component = DemoRequestNotification(props);
+      subject = `New Demo Request: ${props.organizationName}`;
       break;
     default:
       throw new Error(`Unknown email template: ${templateName}`);

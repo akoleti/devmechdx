@@ -1,0 +1,9 @@
+{
+  "Source": "MechDX <no-reply@mechdx.com>",
+  "Template": "GenericNotificationEvent",
+  "ConfigurationSetName": "DefaultConfigSet",
+  "Destination": {
+    "ToAddresses": [ "zane@whitebayassets.com" ]
+  },
+  "TemplateData": "{ \"UsersName\": \"J. Zane Cook\", \"CurrentYear\": \"2022\", \"ThisEmailID\": \"12345\", \"Action\": \"Edited\", \"Resource\": \"An Equipment\", \"NotificationID\": \"12345\", \"Message\": \"Water Cooled Chiller - Chiller #1 at Corpus Christi ISD > Kolda Elementary was Edited by Bobby Brown.\" }"
+}

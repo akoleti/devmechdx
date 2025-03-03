@@ -1,0 +1,9 @@
+{
+  "Source": "MechDX <no-reply@mechdx.com>",
+  "Template": "AccountUpdate",
+  "ConfigurationSetName": "DefaultConfigSet",
+  "Destination": {
+    "ToAddresses": [ "zane@whitebayassets.com" ]
+  },
+  "TemplateData": "{ \"CurrentYear\": \"2022\", \"ThisEmailID\": \"12345\", \"UsersName\": \"J. Zane Cook\", \"NewPassword\": \"ProTech1\" }"
+}

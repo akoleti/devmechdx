@@ -1,0 +1,9 @@
+{
+  "Source": "MechDX <no-reply@mechdx.com>",
+  "Template": "LogEntryAlert",
+  "ConfigurationSetName": "DefaultConfigSet",
+  "Destination": {
+    "ToAddresses": [ "zane@whitebayassets.com" ]
+  },
+  "TemplateData": "{ \"CurrentYear\": \"2022\", \"ThisEmailID\": \"12345\", \"EquipmentName\": \"Water Cooled Chiller - Chiller #1\", \"LocationName\": \"Kolda Elementary\", \"CustomerName\": \"Corpus Christi ISD\", \"NotificationID\": \"12345\", \"AlertURL\": \"https://mechdx.com/alerts\", \"AlertTitle\": \"A Log Entry Alert has been triggered for a log.\", \"AlertMessage\": \"On timestamp, this alert was triggered by byUser. Click the button below to view this log in MechDX.\" }"
+}
