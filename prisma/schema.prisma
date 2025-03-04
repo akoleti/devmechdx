@@ -104,13 +104,17 @@ model Plan {
   id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name          String
   description   String
-  price         Int
+  price         Float
+  isActive      Boolean        @default(true)
+  isDeleted     Boolean        @default(false)
+  features      String[]       @default([])
+  trialDays     Int?
+  savings       Float?
+  requiresCard  Boolean        @default(true)
+  isPopular     Boolean        @default(false)
+  isCustom      Boolean        @default(false)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-  deletedAt     DateTime?
-  isDeleted     Boolean        @default(false)
-  isActive      Boolean        @default(true)
-  isArchived    Boolean        @default(false)
   organizations Organization[]
 }
 

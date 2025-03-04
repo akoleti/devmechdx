@@ -1,7 +1,11 @@
-import { PrismaClient, Role, OrganizationType, OrganizationPlanStatus, EquipmentType, EquipmentDesignInfoType } from '@prisma/client';
-import { hashPassword } from '../lib/auth/password.js';
+const { PrismaClient, Role, OrganizationType, OrganizationPlanStatus } = require('@prisma/client');
+const crypto = require('crypto');
 
 const prisma = new PrismaClient();
+
+function hashPassword(password) {
+  return crypto.createHash('sha256').update(password).digest('hex');
+}
 
 async function cleanDatabase() {
   // Delete all records in reverse order of dependencies
@@ -19,30 +23,66 @@ async function main() {
   await cleanDatabase();
 
   // Create plans
-  const freePlan = await prisma.plan.create({
+  const starterPlan = await prisma.plan.create({
     data: {
-      name: 'Free',
-      description: 'Perfect for small teams and startups',
-      price: 0,
+      name: 'Starter',
+      description: 'Perfect for small facilities',
+      price: 299,
       isActive: true,
+      features: [
+        'Up to 5 HVAC units',
+        'Basic monitoring',
+        'Email support',
+        'Mobile app access',
+        'Weekly reports'
+      ],
+      trialDays: 14,
+      savings: 598,
+      requiresCard: false
     },
   });
 
-  const proPlan = await prisma.plan.create({
+  const professionalPlan = await prisma.plan.create({
     data: {
-      name: 'Pro',
-      description: 'Ideal for growing organizations',
-      price: 299,
+      name: 'Professional',
+      description: 'Ideal for medium-sized buildings',
+      price: 599,
       isActive: true,
+      features: [
+        'Up to 20 HVAC units',
+        'Advanced analytics',
+        'Priority support',
+        'API access',
+        'Custom alerts',
+        'Daily reports',
+        'Energy optimization',
+        'Maintenance scheduling'
+      ],
+      trialDays: 30,
+      savings: 1198,
+      requiresCard: false,
+      isPopular: true
     },
   });
 
   const enterprisePlan = await prisma.plan.create({
     data: {
       name: 'Enterprise',
-      description: 'For large organizations with advanced needs',
-      price: 999,
+      description: 'For large organizations',
+      price: 0, // Custom pricing
       isActive: true,
+      features: [
+        'Unlimited HVAC units',
+        'Predictive maintenance',
+        'Dedicated support',
+        'Custom integration',
+        'Advanced security',
+        'Real-time monitoring',
+        'Multi-site management',
+        'Custom reporting',
+        'SLA guarantee'
+      ],
+      isCustom: true
     },
   });
 
@@ -118,7 +158,7 @@ async function main() {
       name: 'Tech Support Inc',
       type: OrganizationType.VENDOR,
       ownerId: techUser.id,
-      planId: proPlan.id,
+      planId: professionalPlan.id,
       planStatus: OrganizationPlanStatus.ACTIVE,
       planStartDate: new Date(),
       planEndDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
@@ -132,7 +172,7 @@ async function main() {
       name: 'Small Business LLC',
       type: OrganizationType.CUSTOMER,
       ownerId: customerUser.id,
-      planId: freePlan.id,
+      planId: starterPlan.id,
       planStatus: OrganizationPlanStatus.ACTIVE,
       planStartDate: new Date(),
       planEndDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
@@ -244,157 +284,6 @@ async function main() {
   });
 
   console.log('Created sessions');
-
-  // Create contacts for organizations
-  const acmeContact = await prisma.contact.create({
-    data: {
-      userId: adminUser.id,
-      organizationId: acmeOrg.id,
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john.doe@acme.com',
-      phone: '555-123-4567',
-      verified: true,
-    },
-  });
-
-  const techSupportContact = await prisma.contact.create({
-    data: {
-      userId: techUser.id,
-      organizationId: techSupportOrg.id,
-      firstName: 'Jane',
-      lastName: 'Smith',
-      email: 'jane.smith@techsupport.com',
-      phone: '555-987-6543',
-      verified: true,
-    },
-  });
-
-  const smallBizContact = await prisma.contact.create({
-    data: {
-      userId: customerUser.id,
-      organizationId: smallBizOrg.id,
-      firstName: 'Bob',
-      lastName: 'Johnson',
-      email: 'bob.johnson@smallbiz.com',
-      phone: '555-567-8901',
-      verified: true,
-    },
-  });
-
-  console.log('Created contacts');
-
-  // Create locations for organizations
-  const acmeLocation = await prisma.location.create({
-    data: {
-      name: 'Acme Headquarters',
-      address: '123 Acme St',
-      city: 'Metropolis',
-      state: 'NY',
-      zip: '10001',
-      country: 'USA',
-      contactId: acmeContact.id,
-      organizationId: acmeOrg.id,
-    },
-  });
-
-  const techSupportLocation = await prisma.location.create({
-    data: {
-      name: 'Tech Support Office',
-      address: '456 Tech Blvd',
-      city: 'Silicon Valley',
-      state: 'CA',
-      zip: '94025',
-      country: 'USA',
-      contactId: techSupportContact.id,
-      organizationId: techSupportOrg.id,
-    },
-  });
-
-  const smallBizLocation = await prisma.location.create({
-    data: {
-      name: 'Small Business Shop',
-      address: '789 Main St',
-      city: 'Smalltown',
-      state: 'OH',
-      zip: '43210',
-      country: 'USA',
-      contactId: smallBizContact.id,
-      organizationId: smallBizOrg.id,
-    },
-  });
-
-  console.log('Created locations');
-
-  // Create equipments
-  const acmeEquipment1 = await prisma.equipment.create({
-    data: {
-      name: 'Acme Chiller 1',
-      type: EquipmentType.AIR_COOLED_CHILLER,
-      serialNumber: 'ACH-001',
-      modelNumber: 'ACH-2023',
-      refrigerantType: 'R-134a',
-      nickname: 'Main Office Chiller',
-      description: 'Primary cooling system for main office',
-      locationId: acmeLocation.id,
-      organizationId: acmeOrg.id,
-    },
-  });
-
-  const acmeEquipment2 = await prisma.equipment.create({
-    data: {
-      name: 'Acme Boiler 1',
-      type: EquipmentType.HOT_WATER_BOILER,
-      serialNumber: 'AHB-001',
-      modelNumber: 'AHB-2023',
-      refrigerantType: 'N/A',
-      nickname: 'Main Office Boiler',
-      description: 'Primary heating system for main office',
-      locationId: acmeLocation.id,
-      organizationId: acmeOrg.id,
-    },
-  });
-
-  const smallBizEquipment = await prisma.equipment.create({
-    data: {
-      name: 'Small Biz Chiller',
-      type: EquipmentType.AIR_COOLED_CHILLER,
-      serialNumber: 'SBC-001',
-      modelNumber: 'SBC-2022',
-      refrigerantType: 'R-410A',
-      nickname: 'Shop Chiller',
-      description: 'Main cooling system for retail shop',
-      locationId: smallBizLocation.id,
-      organizationId: smallBizOrg.id,
-    },
-  });
-
-  console.log('Created equipment');
-
-  // Create some design info for equipment
-  await prisma.equipmentDesignInfo.create({
-    data: {
-      equipmentId: acmeEquipment1.id,
-      designType: EquipmentDesignInfoType.Evaporator,
-      designTypeDescription: 'Main evaporator unit',
-      designValue: '150 ton',
-      checklist: true,
-    },
-  });
-
-  await prisma.equipmentDesignInfo.create({
-    data: {
-      equipmentId: acmeEquipment1.id,
-      designType: EquipmentDesignInfoType.Compressor,
-      designTypeDescription: 'Primary compressor',
-      designValue: '200 HP',
-      checklist: true,
-    },
-  });
-
-  console.log('Created equipment design info');
-
-  console.log('Database seeding completed!');
 }
 
 main()

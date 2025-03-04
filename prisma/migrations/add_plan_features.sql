@@ -1,0 +1,12 @@
+-- Add new columns to Plan table
+ALTER TABLE "Plan" 
+ADD COLUMN IF NOT EXISTS "features" TEXT[] DEFAULT '{}',
+ADD COLUMN IF NOT EXISTS "trialDays" INTEGER,
+ADD COLUMN IF NOT EXISTS "savings" DECIMAL,
+ADD COLUMN IF NOT EXISTS "requiresCard" BOOLEAN DEFAULT true,
+ADD COLUMN IF NOT EXISTS "isPopular" BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS "isCustom" BOOLEAN DEFAULT false;
+
+-- Update price column to decimal
+ALTER TABLE "Plan" 
+ALTER COLUMN "price" TYPE DECIMAL; 
