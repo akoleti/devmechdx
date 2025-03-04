@@ -45,7 +45,7 @@ const formSchema = z.object({
 // Plans data
 const PLANS_DATA: Plan[] = [
   {
-    id: "free-plan",
+    id: "2ebc2fa1-1c3c-40db-857c-bb70239cb003",
     name: "Starter 14-day Free Trial",
     description: "For small organizations getting started",
     price: 0,
@@ -61,7 +61,7 @@ const PLANS_DATA: Plan[] = [
     isCustom: false
   },
   {
-    id: "professional-free-trial",
+    id: "2a0f5b31-cc79-4b64-a2fd-ed45e79c60ce",
     name: "Professional 30-day Free Trial",
     description: "For medium-sized organizations",
     price:  0,
@@ -80,7 +80,7 @@ const PLANS_DATA: Plan[] = [
     isCustom: false
   },
   {
-    id: "starter-trial",
+    id: "3a1e1a16-a043-4043-bac0-2c117ac00124",
     name: "Starter",
     description: "For growing organizations",
     price: 299,
@@ -96,7 +96,7 @@ const PLANS_DATA: Plan[] = [
     isCustom: false
   },
   {
-    id: "professional",
+    id: "637a703b-ba7e-4852-803a-bc71a809cd4f",
     name: "Professional",
     description: "For medium-sized organizations",
     price: 599,
@@ -115,7 +115,7 @@ const PLANS_DATA: Plan[] = [
     isCustom: false
   },
   {
-    id: "enterprise",
+    id: "0ab5c742-59ff-4aaa-bc48-e84bc80c21f7",
     name: "Enterprise",
     description: "For large organizations",
     price: 599,
@@ -188,24 +188,23 @@ export default function NewOrganizationPage() {
 
   // Handle form submission
   async function onSubmit(data: FormValues) {
+    console.log(data);
     setIsSubmitting(true);
     setError(null);
 
     try {
       // Create date objects for plan duration
       const planStartDate = new Date();
-      const planEndDate = new Date();
-      planEndDate.setFullYear(planEndDate.getFullYear() + 1);
+      const planEndDate = new Date(planStartDate.getTime() + 15 * 24 * 60 * 60 * 1000);
 
       // Convert dates to number (timestamp) for JSON serialization
       const requestData = {
         name: data.name,
         type: data.type,
-        planId: data.planId,
-        planStartDate: planStartDate.getTime(),
-        planEndDate: planEndDate.getTime(),
+        planId: data.planId
       };
 
+      console.log(requestData);
       // Call API to create organization
       const response = await fetch('/api/organizations', {
         method: 'POST',
@@ -363,7 +362,7 @@ export default function NewOrganizationPage() {
                                         ) : (
                                           <>
                                             <div className="text-2xl font-bold">Free</div>
-                                            <div className="text-sm text-gray-500">forever</div>
+  
                                           </>
                                         )}
                                       </div>
