@@ -112,32 +112,12 @@ export default function NewOrganizationPage() {
 
   return (
     <>
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <LayoutGrid className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">DevMechDX</span>
-          </div>
-          <div>
-            {session?.user?.name && (
-              <span className="text-sm text-gray-600">Hello, {session.user.name}</span>
-            )}
-          </div>
-        </div>
-      </header>
+     
 
       {/* Main content */}
       <main className="container mx-auto py-12 px-4">
         <div className="max-w-md mx-auto">
-          <Button
-            variant="ghost"
-            className="mb-6 flex items-center text-gray-500"
-            onClick={() => router.back()}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
+         
 
           <div className="text-center mb-8">
             <Building className="h-12 w-12 text-primary mx-auto mb-4" />
@@ -218,12 +198,6 @@ export default function NewOrganizationPage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t py-6 mt-auto">
-        <div className="container mx-auto px-4 text-center text-gray-500 text-sm">
-          <p>&copy; {new Date().getFullYear()} DevMechDX. All rights reserved.</p>
-        </div>
-      </footer>
     </>
   );
 }

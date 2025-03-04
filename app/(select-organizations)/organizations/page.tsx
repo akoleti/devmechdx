@@ -102,33 +102,7 @@ export default function OrganizationsPage() {
   // Handle navigation redirection when unauthenticated
   
 
-  const handleSelectOrganization = useCallback(async (organizationId: string) => {
-    try {
-      // If already loading, prevent multiple calls
-     
-      // Call API to set the current organization
-      const response = await fetch('/api/user/set-organization', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ organizationId }),
-      });
 
-      if (!response.ok) {
-        throw new Error('Failed to select organization');
-      }
-
-      // Update current organization in store
-      setCurrentOrganization(organizationId);
-      
-      // Navigate to dashboard
-      router.replace('/dashboard');
-    } catch (error) {
-      console.error('Error selecting organization:', error);
-      setLoading(false);
-    }
-  }, [router, loading, setCurrentOrganization]);
 
   // Show loading state while session is loading
   if (status === 'loading' || pageLoading) {
@@ -223,7 +197,7 @@ export default function OrganizationsPage() {
                 </CardContent>
                 <CardFooter>
                   <Button 
-                    onClick={() => handleSelectOrganization(org.id)} 
+                    onClick={() => console.log(org.id)} 
                     disabled={loading}
                     className="w-full relative"
                     type="button"
@@ -249,7 +223,6 @@ export default function OrganizationsPage() {
         )}
       </main>
 
-     <Footer />
     </>
   );
 }
