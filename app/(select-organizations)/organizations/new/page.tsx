@@ -66,7 +66,7 @@ const PLANS_DATA: Plan[] = [
     description: "For medium-sized organizations",
     price:  0,
     trialDays: 30,
-    features: [
+      features: [
       "Up to 50 HVAC units",
       "Advanced monitoring",
       "Predictive maintenance",
@@ -164,7 +164,7 @@ export default function NewOrganizationPage() {
     defaultValues: {
       name: '',
       type: 'CUSTOMER',
-      planId: '',
+      planId: 'free-plan',
     },
   });
 
@@ -192,21 +192,44 @@ export default function NewOrganizationPage() {
     setError(null);
 
     try {
+      // Create date objects for plan duration
+      const planStartDate = new Date();
+      const planEndDate = new Date();
+      planEndDate.setFullYear(planEndDate.getFullYear() + 1);
+
+      // Convert dates to number (timestamp) for JSON serialization
+      const requestData = {
+        name: data.name,
+        type: data.type,
+        planId: data.planId,
+        planStartDate: planStartDate.getTime(),
+        planEndDate: planEndDate.getTime(),
+      };
+
       // Call API to create organization
       const response = await fetch('/api/organizations', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...data,
-          planStartDate: new Date(),
-          planEndDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
-        }),
+        body: JSON.stringify(requestData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
+        if (errorData.details) {
+          // Handle validation errors
+          const errorMessage = Object.entries(errorData.details)
+            .map(([key, value]: [string, any]) => {
+              if (value._errors && value._errors.length > 0) {
+                return `${key}: ${value._errors.join(', ')}`;
+              }
+              return null;
+            })
+            .filter(Boolean)
+            .join('; ');
+          throw new Error(errorMessage || errorData.error || 'Failed to create organization');
+        }
         throw new Error(errorData.error || 'Failed to create organization');
       }
 
