@@ -9,7 +9,7 @@ import { sendEmail } from '@/lib/email';
 // Schema for validating the invitation request
 const inviteSchema = z.object({
   email: z.string().email("Invalid email address"),
-  role: z.enum(["USER", "MANAGER", "ADMINISTRATOR"]),
+  role: z.enum(["USER", "MANAGER", "ADMINISTRATOR", "SUPERVISOR", "TECHNICIAN", "DISPATCHER", "ESTIMATOR", "CUSTOMER"]),
   message: z.string().optional(),
 });
 

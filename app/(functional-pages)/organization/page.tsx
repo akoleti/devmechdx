@@ -20,6 +20,16 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { 
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel
+} from "@/components/ui/alert-dialog";
 
 // Define the organization schema
 const organizationSchema = z.object({
@@ -204,125 +214,125 @@ export default function OrganizationPage() {
     },
   });
 
-  // Fetch organization data once
-  useEffect(() => {
-    const fetchOrganizationData = async () => {
-      try {
-        setIsLoading(true);
-        
-        // If we don't have organization in session, try to fetch it
-        if (!session?.user?.currentOrganization) {
-          const response = await fetch('/api/user/current-organization');
-          if (response.ok) {
-            const data = await response.json();
-            if (data.currentOrganization && !session?.user?.currentOrganization) {
-              await update({
-                currentOrganization: data.currentOrganization,
-                currentRole: data.currentRole
-              });
-            }
-          }
-          return; // Wait for session update to trigger this effect again
-        }
-        
-        // Get full organization details
-        const orgId = session.user.currentOrganization.id;
-        const response = await fetch(`/api/organizations/${orgId}`);
-        
+  // Function to fetch organization data
+  const fetchOrganizationData = async () => {
+    try {
+      setIsLoading(true);
+      
+      // If we don't have organization in session, try to fetch it
+      if (!session?.user?.currentOrganization) {
+        const response = await fetch('/api/user/current-organization');
         if (response.ok) {
           const data = await response.json();
-          setOrganization(data.organization);
-          
-          console.log("Organization data from API:", data.organization);
-          
-          // Set form values from organization data
-          form.reset({
-            name: data.organization.name || '',
-            type: data.organization.type || 'BUSINESS',
-            description: data.organization.description || '',
-            address: data.organization.address || '',
-            city: data.organization.city || '',
-            state: data.organization.state || '',
-            zip: data.organization.zip || '',
-            country: data.organization.country || '',
-            phone: data.organization.phone || '',
-            email: data.organization.email || '',
-            website: data.organization.website || '',
-          });
-          
-          // Set the current plan if it exists
-          if (data.organization.plan) {
-            console.log("Found plan in API response:", data.organization.plan);
-            
-            // Convert the plan to lowercase and normalize it
-            let planId = data.organization.plan.toLowerCase();
-            
-            // Handle potential UPPERCASE plan IDs like "STARTER" -> "starter"
-            if (planId === "free" || planId === "starter" || planId === "professional" || planId === "enterprise") {
-              setSelectedPlan(planId);
-            } 
-            // Handle potential full plan names like "Starter Plan" -> "starter"
-            else if (planId.includes("free")) {
-              setSelectedPlan("free");
-            }
-            else if (planId.includes("starter")) {
-              setSelectedPlan("starter");
-            } 
-            else if (planId.includes("professional")) {
-              setSelectedPlan("professional");
-            } 
-            else if (planId.includes("enterprise")) {
-              setSelectedPlan("enterprise");
-            }
-            // If we can't match it, just use what we got
-            else {
-              setSelectedPlan(planId);
-            }
-          } else {
-            console.log("No plan found in API response, defaulting to free");
-            setSelectedPlan('free');
-            
-            // Also check if plan info might be in the description JSON
-            try {
-              if (data.organization.description) {
-                const descData = JSON.parse(data.organization.description);
-                if (descData && descData.plan) {
-                  console.log("Found plan in description JSON:", descData.plan);
-                  // Set the plan using the same logic as above
-                  let planId = descData.plan.toLowerCase();
-                  if (planId === "free" || planId === "starter" || planId === "professional" || planId === "enterprise") {
-                    setSelectedPlan(planId);
-                  } else if (planId.includes("free")) {
-                    setSelectedPlan("free");
-                  } else if (planId.includes("starter")) {
-                    setSelectedPlan("starter");
-                  } else if (planId.includes("professional")) {
-                    setSelectedPlan("professional");
-                  } else if (planId.includes("enterprise")) {
-                    setSelectedPlan("enterprise");
-                  } else {
-                    setSelectedPlan(planId);
-                  }
-                }
-              }
-            } catch (e) {
-              console.log("Failed to parse description JSON:", e);
-            }
+          if (data.currentOrganization && !session?.user?.currentOrganization) {
+            await update({
+              currentOrganization: data.currentOrganization,
+              currentRole: data.currentRole
+            });
           }
         }
-      } catch (error) {
-        console.error('Error fetching organization:', error);
-      } finally {
-        setIsLoading(false);
+        return; // Wait for session update to trigger this effect again
       }
-    };
+      
+      // Get full organization details
+      const orgId = session.user.currentOrganization.id;
+      const response = await fetch(`/api/organizations/${orgId}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setOrganization(data.organization);
+        
+        console.log("Organization data from API:", data.organization);
+        
+        // Set form values from organization data
+        form.reset({
+          name: data.organization.name || '',
+          type: data.organization.type || 'BUSINESS',
+          description: data.organization.description || '',
+          address: data.organization.address || '',
+          city: data.organization.city || '',
+          state: data.organization.state || '',
+          zip: data.organization.zip || '',
+          country: data.organization.country || '',
+          phone: data.organization.phone || '',
+          email: data.organization.email || '',
+          website: data.organization.website || '',
+        });
+        
+        // Set the current plan if it exists
+        if (data.organization.plan) {
+          console.log("Found plan in API response:", data.organization.plan);
+          
+          // Convert the plan to lowercase and normalize it
+          let planId = data.organization.plan.toLowerCase();
+          
+          // Handle potential UPPERCASE plan IDs like "STARTER" -> "starter"
+          if (planId === "free" || planId === "starter" || planId === "professional" || planId === "enterprise") {
+            setSelectedPlan(planId);
+          } 
+          // Handle potential full plan names like "Starter Plan" -> "starter"
+          else if (planId.includes("free")) {
+            setSelectedPlan("free");
+          }
+          else if (planId.includes("starter")) {
+            setSelectedPlan("starter");
+          } 
+          else if (planId.includes("professional")) {
+            setSelectedPlan("professional");
+          } 
+          else if (planId.includes("enterprise")) {
+            setSelectedPlan("enterprise");
+          }
+          // If we can't match it, just use what we got
+          else {
+            setSelectedPlan(planId);
+          }
+        } else {
+          console.log("No plan found in API response, defaulting to free");
+          setSelectedPlan('free');
+          
+          // Also check if plan info might be in the description JSON
+          try {
+            if (data.organization.description) {
+              const descData = JSON.parse(data.organization.description);
+              if (descData && descData.plan) {
+                console.log("Found plan in description JSON:", descData.plan);
+                // Set the plan using the same logic as above
+                let planId = descData.plan.toLowerCase();
+                if (planId === "free" || planId === "starter" || planId === "professional" || planId === "enterprise") {
+                  setSelectedPlan(planId);
+                } else if (planId.includes("free")) {
+                  setSelectedPlan("free");
+                } else if (planId.includes("starter")) {
+                  setSelectedPlan("starter");
+                } else if (planId.includes("professional")) {
+                  setSelectedPlan("professional");
+                } else if (planId.includes("enterprise")) {
+                  setSelectedPlan("enterprise");
+                } else {
+                  setSelectedPlan(planId);
+                }
+              }
+            }
+          } catch (e) {
+            console.log("Failed to parse description JSON:", e);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching organization:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     // Only fetch once when session is available and we haven't already fetched
     if (session && !hasRefreshedRef.current) {
       hasRefreshedRef.current = true;
       fetchOrganizationData();
     }
-  }, [session, update, form]);
+  }, [session, update]);
 
   // Set the correct tab based on selected plan
   useEffect(() => {
@@ -747,6 +757,12 @@ export default function OrganizationPage() {
     if (value === 'members') {
       fetchOrganizationUsers();
     }
+    if (value === 'billing') {
+      // Ensure we have the latest organization data for billing information
+      if (session?.user?.currentOrganization?.id && !hasRefreshedRef.current) {
+        fetchOrganizationData();
+      }
+    }
   };
 
   // Handle invite submission
@@ -924,6 +940,139 @@ export default function OrganizationPage() {
     }
   }, [session?.user?.currentOrganization?.id]);
 
+  // Add a function to handle role changes for members
+  const handleRoleChange = async (userId: string, role: string) => {
+    if (!session?.user?.currentOrganization?.id) return;
+    
+    try {
+      const response = await fetch(`/api/organizations/${session.user.currentOrganization.id}/users/${userId}/role`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ role }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast({
+          title: "Role Updated",
+          description: `${data.userName || 'User'}'s role has been updated to ${getRoleDisplay(role)}.`,
+          variant: "default",
+          className: "bg-green-50 border-green-200 text-green-800",
+        });
+        
+        // Refresh the users list
+        await fetchOrganizationUsers();
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to update role",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error updating role:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Add function to handle invitation role changes
+  const handleInvitationRoleChange = async (invitationId: string, role: string) => {
+    if (!session?.user?.currentOrganization?.id) return;
+    
+    try {
+      const response = await fetch(`/api/organizations/${session.user.currentOrganization.id}/invitations/${invitationId}/role`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ role }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast({
+          title: "Invitation Role Updated",
+          description: `The invitation for ${data.email} has been updated to ${getRoleDisplay(role)}.`,
+          variant: "default",
+          className: "bg-green-50 border-green-200 text-green-800",
+        });
+        
+        // Refresh invitations list
+        await fetchOrganizationInvitations();
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to update invitation role",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error updating invitation role:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Add this new function for handling organization deletion
+  const handleDeleteOrganization = async () => {
+    if (!session?.user?.currentOrganization?.id) {
+      toast({
+        title: "Error",
+        description: "No organization selected",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Call the API to delete the organization
+      const response = await fetch(`/api/organizations/${session.user.currentOrganization.id}/delete`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Organization Deleted",
+          description: "The organization has been permanently deleted",
+          variant: "default",
+          className: "bg-green-50 border-green-200 text-green-800",
+        });
+
+        // Refresh session to update user's organization context
+        await update();
+
+        // Redirect to organizations page
+        router.push('/organizations');
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to delete organization",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting organization:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center mb-6">
@@ -957,6 +1106,7 @@ export default function OrganizationPage() {
           <TabsList className="mb-6">
             <TabsTrigger value="details">Organization Details</TabsTrigger>
             <TabsTrigger value="members">Members</TabsTrigger>
+            <TabsTrigger value="billing">Billing</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
           
@@ -1266,66 +1416,47 @@ export default function OrganizationPage() {
                       </div>
                       
                       {/* Address Information */}
-                      <div>
-                        <h3 className="text-lg font-medium mb-4">Address</h3>
-                        <dl>
-                          <dt className="sr-only">Full Address</dt>
-                          <dd>
-                            {organization.address ? (
-                              <address className="not-italic">
-                                {organization.address}<br />
-                                {organization.city ? `${organization.city}, ` : ''}
-                                {organization.state || ''} {organization.zip || ''}<br />
-                                {organization.country || ''}
-                              </address>
-                            ) : (
-                              <span className="text-muted-foreground">No address provided</span>
-                            )}
-                          </dd>
-                        </dl>
-                      </div>
-                      
-                      {/* Subscription & Billing Section */}
-                      <div>
-                        <h3 className="text-lg font-medium mb-4">Subscription & Billing</h3>
-                        <div className="bg-muted/30 rounded-lg p-6">
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <h4 className="font-medium">Current Plan</h4>
-                              <div className="text-sm text-muted-foreground mt-1 space-y-1">
-                                <p className="font-medium text-primary">
-                                  {getCurrentPlanDisplay()}
-                                </p>
-                                
-                                {/* Show billing period if available */}
-                                {getPlanBillingPeriod() && (
-                                  <p className="text-xs">
-                                    Billed {getPlanBillingPeriod()} • 
-                                    Updated {getPlanLastUpdated()}
-                                  </p>
-                                )}
+                      {(organization.address || organization.city || organization.state || organization.zip || organization.country) && (
+                        <div>
+                          <h3 className="text-lg font-medium mb-4">Address</h3>
+                          <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                            {organization.address && (
+                              <div className="col-span-2">
+                                <dt className="text-muted-foreground">Street Address</dt>
+                                <dd className="mt-1 font-medium">{organization.address}</dd>
                               </div>
-                            </div>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={openPlanSelection}
-                              disabled={!['ADMINISTRATOR', 'MANAGER'].includes(session?.user?.currentRole || '')}
-                              className="transition-all hover:bg-primary hover:text-primary-foreground"
-                            >
-                              Upgrade Plan
-                            </Button>
-                          </div>
-                          
-                          {['ADMINISTRATOR', 'MANAGER'].includes(session?.user?.currentRole || '') && (
-                            <p className="text-sm text-muted-foreground mt-4 border-t border-muted-foreground/20 pt-4">
-                              As an {session?.user?.currentRole === 'ADMINISTRATOR' ? 'administrator' : 'manager'}, 
-                              you can upgrade the organization's plan to access more features and capabilities.
-                              Click the "Upgrade Plan" button to explore available options.
-                            </p>
-                          )}
+                            )}
+                            
+                            {organization.city && (
+                              <div>
+                                <dt className="text-muted-foreground">City</dt>
+                                <dd className="mt-1 font-medium">{organization.city}</dd>
+                              </div>
+                            )}
+                            
+                            {organization.state && (
+                              <div>
+                                <dt className="text-muted-foreground">State / Province</dt>
+                                <dd className="mt-1 font-medium">{organization.state}</dd>
+                              </div>
+                            )}
+                            
+                            {organization.zip && (
+                              <div>
+                                <dt className="text-muted-foreground">ZIP / Postal Code</dt>
+                                <dd className="mt-1 font-medium">{organization.zip}</dd>
+                              </div>
+                            )}
+                            
+                            {organization.country && (
+                              <div>
+                                <dt className="text-muted-foreground">Country</dt>
+                                <dd className="mt-1 font-medium">{organization.country}</dd>
+                              </div>
+                            )}
+                          </dl>
                         </div>
-                      </div>
+                      )}
                     </div>
                   )
                 )}
@@ -1439,7 +1570,38 @@ export default function OrganizationPage() {
                               </div>
                             </TableCell>
                             <TableCell>
-                              <Badge variant={getRoleBadgeVariant(user.role)}>{getRoleDisplay(user.role)}</Badge>
+                              {/* Show role selector for admins/managers, badge for others */}
+                              {['ADMINISTRATOR', 'MANAGER'].includes(session?.user?.currentRole || '') && 
+                               user.id !== session?.user?.id ? (
+                                <Select 
+                                  defaultValue={user.role} 
+                                  onValueChange={(value) => handleRoleChange(user.id, value)}
+                                  disabled={
+                                    // Managers can't change admin roles
+                                    (session?.user?.currentRole === 'MANAGER' && user.role === 'ADMINISTRATOR') ||
+                                    // Only the user themselves can change their own role
+                                    (user.role === 'ADMINISTRATOR' && user.id !== session?.user?.id)
+                                  }
+                                >
+                                  <SelectTrigger className="w-[140px]">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="USER">User</SelectItem>
+                                    <SelectItem value="MANAGER">Manager</SelectItem>
+                                    <SelectItem value="SUPERVISOR">Supervisor</SelectItem>
+                                    <SelectItem value="TECHNICIAN">Technician</SelectItem>
+                                    <SelectItem value="DISPATCHER">Dispatcher</SelectItem>
+                                    <SelectItem value="ESTIMATOR">Estimator</SelectItem>
+                                    <SelectItem value="CUSTOMER">Customer</SelectItem>
+                                    {session?.user?.currentRole === 'ADMINISTRATOR' && (
+                                      <SelectItem value="ADMINISTRATOR">Administrator</SelectItem>
+                                    )}
+                                  </SelectContent>
+                                </Select>
+                              ) : (
+                                <Badge variant={getRoleBadgeVariant(user.role)}>{getRoleDisplay(user.role)}</Badge>
+                              )}
                             </TableCell>
                             <TableCell>
                               {user.isActive ? (
@@ -1493,6 +1655,12 @@ export default function OrganizationPage() {
                   <div className="mt-6">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="text-lg font-medium">Pending Invitations</h3>
+                      {canInviteMembers && (
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <Info className="h-4 w-4 mr-1" />
+                          <span>You can change roles before or after invitations are accepted</span>
+                        </div>
+                      )}
                     </div>
                     <div className="rounded-md border">
                       <Table>
@@ -1513,9 +1681,36 @@ export default function OrganizationPage() {
                                 {invitation.email}
                               </TableCell>
                               <TableCell>
-                                <Badge variant="outline" className="capitalize">
-                                  {invitation.role.toLowerCase()}
-                                </Badge>
+                                {canInviteMembers ? (
+                                  <Select 
+                                    defaultValue={invitation.role} 
+                                    onValueChange={(value) => handleInvitationRoleChange(invitation.id, value)}
+                                    disabled={
+                                      // Managers can't set admin role
+                                      session?.user?.currentRole === 'MANAGER' && invitation.role === 'ADMINISTRATOR'
+                                    }
+                                  >
+                                    <SelectTrigger className="w-[140px]">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="USER">User</SelectItem>
+                                      <SelectItem value="MANAGER">Manager</SelectItem>
+                                      <SelectItem value="SUPERVISOR">Supervisor</SelectItem>
+                                      <SelectItem value="TECHNICIAN">Technician</SelectItem>
+                                      <SelectItem value="DISPATCHER">Dispatcher</SelectItem>
+                                      <SelectItem value="ESTIMATOR">Estimator</SelectItem>
+                                      <SelectItem value="CUSTOMER">Customer</SelectItem>
+                                      {session?.user?.currentRole === 'ADMINISTRATOR' && (
+                                        <SelectItem value="ADMINISTRATOR">Administrator</SelectItem>
+                                      )}
+                                    </SelectContent>
+                                  </Select>
+                                ) : (
+                                  <Badge variant="outline" className="capitalize">
+                                    {invitation.role.toLowerCase()}
+                                  </Badge>
+                                )}
                               </TableCell>
                               <TableCell>
                                 {invitation.invitedBy.name || invitation.invitedBy.email}
@@ -1572,6 +1767,190 @@ export default function OrganizationPage() {
             </Card>
           </TabsContent>
           
+          <TabsContent value="billing">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <div className="h-5 w-5 mr-2">💳</div>
+                  Subscription & Billing
+                </CardTitle>
+                <CardDescription>
+                  Manage your organization's subscription plan and billing settings
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-8">
+                  {/* Current Plan Section */}
+                  <div className="bg-muted/30 rounded-lg p-6">
+                    <div className="flex justify-between items-start mb-6">
+                      <div>
+                        <h3 className="text-lg font-semibold">Current Plan</h3>
+                        <div className="mt-1 space-y-1">
+                          <p className="text-2xl font-bold text-primary">
+                            {getCurrentPlanDisplay()}
+                          </p>
+                          
+                          {/* Show billing period if available */}
+                          {getPlanBillingPeriod() && (
+                            <p className="text-sm text-muted-foreground">
+                              Billed {getPlanBillingPeriod()} • 
+                              Last updated {getPlanLastUpdated()}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <Button
+                        variant="outline"
+                        onClick={openPlanSelection}
+                        disabled={!['ADMINISTRATOR', 'MANAGER'].includes(session?.user?.currentRole || '')}
+                        className="transition-all hover:bg-primary hover:text-primary-foreground"
+                      >
+                        {selectedPlan === 'free' ? 'Upgrade Plan' : 'Change Plan'}
+                      </Button>
+                    </div>
+                    
+                    {/* Payment Method Section */}
+                    {selectedPlan !== 'free' && (
+                      <div className="mb-6 border-t border-muted-foreground/20 pt-6">
+                        <h4 className="text-sm font-medium mb-3">Payment Method</h4>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <div className="bg-muted rounded-md p-2 mr-3">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                                <rect width="20" height="14" x="2" y="5" rx="2" />
+                                <line x1="2" x2="22" y1="10" y2="10" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="font-medium">Visa ending in 4242</p>
+                              <p className="text-xs text-muted-foreground">Expires 12/2025</p>
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="sm" className="text-sm">
+                            Update
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Plan Features */}
+                    <div className={`${selectedPlan !== 'free' ? "border-t border-muted-foreground/20" : ""} pt-6`}>
+                      <h4 className="text-sm font-medium mb-3">Features Included in Your Plan</h4>
+                      <ul className="space-y-2">
+                        {(() => {
+                          const currentPlan = plans.find(p => p.id === selectedPlan) || plans[0]; // Default to free plan
+                          return currentPlan.features.map((feature, idx) => (
+                            <li key={idx} className="flex items-start">
+                              <CheckCircle className="h-5 w-5 text-green-500 mr-2 shrink-0" />
+                              <span className="text-sm">{feature}</span>
+                            </li>
+                          ));
+                        })()}
+                      </ul>
+                    </div>
+                  </div>
+                  
+                  {/* Plan Options Section */}
+                  <div className="border-t border-muted pt-8">
+                    <h3 className="text-lg font-semibold mb-4">Available Plans</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {plans.slice(0, 3).map((plan) => ( // Show only top 3 plans here
+                        <div 
+                          key={plan.id} 
+                          className={`rounded-lg border p-6 relative ${
+                            selectedPlan === plan.id 
+                              ? 'border-primary bg-primary/5' 
+                              : plan.recommended 
+                                ? 'border-primary/50' 
+                                : 'border-border'
+                          }`}
+                        >
+                          {plan.recommended && (
+                            <div className="absolute -top-3 left-0 right-0 flex justify-center">
+                              <span className="bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full">
+                                Most Popular
+                              </span>
+                            </div>
+                          )}
+                          
+                          <div className="mb-4">
+                            <h3 className="font-bold text-lg">{plan.name}</h3>
+                            <div className="flex items-baseline mt-2">
+                              <span className="text-2xl font-bold">{getPrice(plan)}</span>
+                              <span className="text-sm text-muted-foreground ml-1">{getDisplayPeriod(plan)}</span>
+                            </div>
+                          </div>
+                          
+                          <Button
+                            variant={selectedPlan === plan.id 
+                              ? "secondary" 
+                              : plan.id === 'free' 
+                                ? "outline" 
+                                : "default"}
+                            className={`w-full mt-4 ${plan.recommended ? 'bg-[#0F62FE] hover:bg-[#0F62FE]/90' : ''}`}
+                            disabled={selectedPlan === plan.id && plan.id !== 'free'}
+                            onClick={() => handleUpgradePlan(plan.id)}
+                          >
+                            {selectedPlan === plan.id ? (
+                              'Current Plan'
+                            ) : plan.id === 'enterprise' ? (
+                              'Contact Sales'
+                            ) : plan.id === 'free' ? (
+                              'Downgrade to Free'
+                            ) : (
+                              'Upgrade'
+                            )}
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div className="mt-6 text-center">
+                      <Button
+                        variant="ghost"
+                        onClick={openPlanSelection}
+                        className="text-primary"
+                      >
+                        View All Plan Options
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Plan Management Notice */}
+                  {['ADMINISTRATOR', 'MANAGER'].includes(session?.user?.currentRole || '') ? (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-8">
+                      <div className="flex">
+                        <Info className="h-5 w-5 text-blue-500 mt-0.5 mr-3 shrink-0" />
+                        <div>
+                          <h4 className="font-medium text-blue-800">Plan Management Access</h4>
+                          <p className="text-sm text-blue-700 mt-1">
+                            As an {session?.user?.currentRole === 'ADMINISTRATOR' ? 'administrator' : 'manager'}, 
+                            you can manage the organization's subscription plan. Changes to the plan will affect all members
+                            of your organization.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-8">
+                      <div className="flex">
+                        <Info className="h-5 w-5 text-gray-500 mt-0.5 mr-3 shrink-0" />
+                        <div>
+                          <h4 className="font-medium text-gray-800">Plan Management Restricted</h4>
+                          <p className="text-sm text-gray-700 mt-1">
+                            Only administrators and managers can change the organization's subscription plan.
+                            Please contact your organization administrator for any plan changes.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
           <TabsContent value="settings">
             <Card>
               <CardHeader>
@@ -1580,10 +1959,71 @@ export default function OrganizationPage() {
                   Manage organization settings and preferences
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-center py-12 text-gray-500">
-                  Organization settings will be implemented in a future update.
-                </p>
+              <CardContent className="space-y-8">
+                {/* Danger Zone */}
+                <div className="border border-red-200 rounded-md p-6">
+                  <h3 className="text-lg font-semibold text-red-600 mb-2">Danger Zone</h3>
+                  <p className="text-sm text-gray-500 mb-6">
+                    Actions in this section can lead to irreversible data loss. Please proceed with caution.
+                  </p>
+                  
+                  {session?.user?.currentRole === 'ADMINISTRATOR' ? (
+                    <div>
+                      <div className="flex items-center justify-between p-4 border border-red-100 rounded-md bg-red-50">
+                        <div>
+                          <h4 className="font-medium text-red-800">Delete Organization</h4>
+                          <p className="text-sm text-red-600 mt-1">
+                            This action permanently deletes this organization and all its data. This cannot be undone.
+                          </p>
+                        </div>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              Delete
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="text-red-600">
+                                Delete organization permanently?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the
+                                organization <strong>{organization?.name}</strong> and all associated data including:
+                                <ul className="list-disc pl-5 mt-2 space-y-1">
+                                  <li>All organization members and their access</li>
+                                  <li>All pending invitations</li>
+                                  <li>All organization settings and preferences</li>
+                                </ul>
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <Button
+                                variant="destructive"
+                                onClick={() => handleDeleteOrganization()}
+                                className="bg-red-600 hover:bg-red-700"
+                              >
+                                Delete organization
+                              </Button>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 border border-gray-200 rounded-md bg-gray-50">
+                      <h4 className="font-medium text-gray-800">Delete Organization</h4>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Only administrators can delete organizations.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1721,9 +2161,9 @@ export default function OrganizationPage() {
                   ) : plan.id === 'enterprise' ? (
                     'Contact Sales'
                   ) : plan.id === 'free' ? (
-                    'Select Free Plan'
+                    'Downgrade to Free'
                   ) : (
-                    'Get Started'
+                    'Upgrade'
                   )}
                 </Button>
               </div>
@@ -1788,6 +2228,11 @@ export default function OrganizationPage() {
                       <SelectContent>
                         <SelectItem value="USER">User</SelectItem>
                         <SelectItem value="MANAGER">Manager</SelectItem>
+                        <SelectItem value="SUPERVISOR">Supervisor</SelectItem>
+                        <SelectItem value="TECHNICIAN">Technician</SelectItem>
+                        <SelectItem value="DISPATCHER">Dispatcher</SelectItem>
+                        <SelectItem value="ESTIMATOR">Estimator</SelectItem>
+                        <SelectItem value="CUSTOMER">Customer</SelectItem>
                         {session?.user?.currentRole === 'ADMINISTRATOR' && (
                           <SelectItem value="ADMINISTRATOR">Administrator</SelectItem>
                         )}

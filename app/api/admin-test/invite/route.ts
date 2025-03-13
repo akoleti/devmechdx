@@ -3,8 +3,8 @@ import { z } from 'zod';
 
 // Validation schema for request body
 const inviteSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" }),
-  role: z.enum(['ADMINISTRATOR', 'MANAGER', 'USER']),
+  email: z.string().email({ message: 'Invalid email format' }),
+  role: z.enum(['ADMINISTRATOR', 'MANAGER', 'USER', 'SUPERVISOR', 'TECHNICIAN', 'DISPATCHER', 'ESTIMATOR', 'CUSTOMER']),
   message: z.string().optional(),
   organizationId: z.string(),
 });
