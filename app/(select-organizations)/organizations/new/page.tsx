@@ -162,50 +162,89 @@ interface PlanCardProps {
 const PlanCard = ({ plan, selected, onSelect }: PlanCardProps) => {
   return (
     <div 
-      className={`border rounded-lg p-4 cursor-pointer transition-all ${
-        selected ? 'border-blue-600 ring-2 ring-blue-200' : 'border-gray-200 hover:border-blue-400'
+      className={`border rounded-lg p-6 cursor-pointer transition-all relative ${
+        selected 
+          ? 'border-primary bg-primary/5' 
+          : plan.isPopular 
+            ? 'border-primary/50' 
+            : 'border-gray-200 hover:border-blue-400'
       }`}
       onClick={onSelect}
     >
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-lg font-semibold">{plan.name}</h3>
-          <p className="text-sm text-gray-500">{plan.description}</p>
+      {plan.isPopular && (
+        <div className="absolute -top-3 left-0 right-0 flex justify-center">
+          <span className="bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full">
+            Most Popular
+          </span>
         </div>
-        <div className="text-right">
+      )}
+      
+      <div className="mb-4">
+        <h3 className="font-bold text-lg">{plan.name}</h3>
+        <div className="flex items-baseline mt-2">
           {plan.isCustom ? (
-            <>
-              <div className="text-2xl font-bold">Custom</div>
-              <div className="text-sm text-gray-500">Contact sales</div>
-            </>
+            <span className="text-3xl font-bold">Custom</span>
           ) : plan.price === 0 ? (
-            <div className="text-2xl font-bold">Free</div>
+            <span className="text-3xl font-bold">Free</span>
           ) : (
             <>
-              <div className="text-2xl font-bold">${plan.price}</div>
-              <div className="text-sm text-gray-500">/month</div>
-              {plan.trialDays && (
-                <div className="text-sm text-blue-600 font-medium mt-1">
-                  {plan.trialDays}-day free trial
-                </div>
-              )}
+              <span className="text-3xl font-bold">${plan.price}</span>
+              <span className="text-sm text-muted-foreground ml-1">/month</span>
             </>
           )}
         </div>
+        
+        {plan.trialDays && (
+          <div className="text-sm text-blue-600 font-medium mt-1">
+            {plan.trialDays}-day free trial
+          </div>
+        )}
+        
+        {plan.savings && (
+          <div className="text-sm text-green-600 mt-1">
+            Save ${plan.savings.toLocaleString()} per year
+          </div>
+        )}
+        
+        {plan.requiresCard && (
+          <div className="text-xs text-muted-foreground mt-1 flex items-center">
+            <Info className="h-3 w-3 mr-1" />
+            Credit card required
+          </div>
+        )}
+        
+        <p className="text-sm text-muted-foreground mt-2">
+          {plan.description}
+        </p>
       </div>
-      <ul className="space-y-2">
-        {plan.features?.slice(0, 3).map((feature, index) => (
-          <li key={index} className="flex items-center text-sm text-gray-600">
-            <Check className="h-4 w-4 text-blue-500 mr-2 flex-shrink-0" />
-            <span>{feature}</span>
+      
+      <ul className="space-y-2 mb-6">
+        {plan.features.map((feature, idx) => (
+          <li key={idx} className="flex items-start">
+            <Check className="h-5 w-5 text-green-500 mr-2 shrink-0" />
+            <span className="text-sm">{feature}</span>
           </li>
         ))}
-        {plan.features && plan.features.length > 3 && (
-          <li className="text-sm text-gray-500">
-            +{plan.features.length - 3} more features
-          </li>
-        )}
       </ul>
+      
+      <Button
+        variant={selected ? "secondary" : plan.isCustom ? "outline" : "default"}
+        className={`w-full ${plan.isPopular ? 'bg-[#0F62FE] hover:bg-[#0F62FE]/90' : ''}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelect();
+        }}
+      >
+        {selected ? (
+          'Selected Plan'
+        ) : plan.isCustom ? (
+          'Contact Sales'
+        ) : plan.price === 0 ? (
+          'Select Free Plan'
+        ) : (
+          'Select Plan'
+        )}
+      </Button>
     </div>
   );
 };
@@ -216,6 +255,12 @@ export default function NewOrganizationPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const [planTab, setPlanTab] = useState<'free' | 'paid'>('free');
+  
+  // Group plans into free and paid
+  const freePlans = PLANS_DATA.filter(plan => plan.price === 0 || plan.trialDays);
+  const paidPlans = PLANS_DATA.filter(plan => !plan.isCustom && plan.price > 0 && !plan.trialDays);
+  const enterprisePlans = PLANS_DATA.filter(plan => plan.isCustom);
   
   // Initialize form
   const form = useForm<FormValues>({
@@ -226,6 +271,28 @@ export default function NewOrganizationPage() {
       planId: 'free-plan',
     },
   });
+
+  // Change tab when a plan is selected
+  useEffect(() => {
+    if (selectedPlan) {
+      // If a free plan is selected, switch to free tab
+      if (selectedPlan.price === 0 || selectedPlan.trialDays) {
+        setPlanTab('free');
+      } else {
+        // If a paid plan is selected, switch to paid tab
+        setPlanTab('paid');
+      }
+    }
+  }, [selectedPlan]);
+
+  // Set the selected plan ID when form initializes or when plans change
+  useEffect(() => {
+    // Default to the first free plan if available
+    if (freePlans.length > 0 && !selectedPlan) {
+      form.setValue('planId', freePlans[0].id);
+      setSelectedPlan(freePlans[0]);
+    }
+  }, [form, freePlans, selectedPlan]);
 
   // Show loading state while session is loading
   if (status === 'loading') {
@@ -252,6 +319,48 @@ export default function NewOrganizationPage() {
     setError(null);
 
     try {
+      // Find the selected plan
+      const selectedPlan = PLANS_DATA.find(plan => plan.id === data.planId);
+      
+      // For enterprise plans, redirect to contact page
+      if (selectedPlan && selectedPlan.isCustom) {
+        // Store organization details in sessionStorage
+        const tempOrgData = {
+          name: data.name,
+          type: data.type,
+          planId: data.planId,
+          timestamp: Date.now()
+        };
+        
+        // Store details in sessionStorage
+        sessionStorage.setItem('pendingOrganization', JSON.stringify(tempOrgData));
+        
+        // Redirect to contact page
+        router.push('/contact?enterprise=true');
+        return;
+      }
+      
+      // For paid plans, redirect to billing flow instead of creating org directly
+      if (selectedPlan && selectedPlan.price > 0 && !selectedPlan.trialDays) {
+        // Create a temporary organization record ID in session storage
+        // This will be used to associate with the actual organization after payment
+        const tempOrgData = {
+          name: data.name,
+          type: data.type,
+          planId: data.planId,
+          timestamp: Date.now()
+        };
+        
+        // Store details in sessionStorage to retrieve after payment
+        sessionStorage.setItem('pendingOrganization', JSON.stringify(tempOrgData));
+        
+        // Redirect to billing page with plan information
+        const billingUrl = `/signup/${selectedPlan.id.toLowerCase()}?billing=monthly&orgName=${encodeURIComponent(data.name)}&orgType=${data.type}`;
+        router.push(billingUrl);
+        return;
+      }
+
+      // For free plans, create the organization directly
       // Create date objects for plan duration
       const planStartDate = new Date();
       const planEndDate = new Date(planStartDate.getTime() + 15 * 24 * 60 * 60 * 1000);
@@ -310,11 +419,6 @@ export default function NewOrganizationPage() {
       setIsSubmitting(false);
     }
   }
-
-  // Group plans into free and paid
-  const freePlans = PLANS_DATA.filter(plan => plan.price === 0 || plan.trialDays);
-  const paidPlans = PLANS_DATA.filter(plan => !plan.isCustom && plan.price > 0 && !plan.trialDays);
-  const enterprisePlans = PLANS_DATA.filter(plan => plan.isCustom);
 
   return (
     <div className="min-h-screen pb-12">
@@ -387,9 +491,7 @@ export default function NewOrganizationPage() {
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="CUSTOMER">Customer</SelectItem>
-                            <SelectItem value="PARTNER">Partner</SelectItem>
-                            <SelectItem value="SUPPLIER">Supplier</SelectItem>
-                            <SelectItem value="INTERNAL">Internal</SelectItem>
+                            <SelectItem value="VENDOR">Vendor</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormDescription>
@@ -404,59 +506,71 @@ export default function NewOrganizationPage() {
                   <div>
                     <h3 className="text-lg font-medium mb-4">Select a Plan</h3>
                     
-                    {/* Free plans */}
-                    <div className="mb-8">
-                      <h4 className="text-md font-medium mb-3">Free Plans</h4>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        {freePlans.map((plan) => (
-                          <PlanCard
-                            key={plan.id}
-                            plan={plan}
-                            selected={form.watch('planId') === plan.id}
-                            onSelect={() => {
-                              form.setValue('planId', plan.id);
-                              setSelectedPlan(plan);
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    
-                    {/* Paid plans */}
-                    <div className="mb-8">
-                      <h4 className="text-md font-medium mb-3">Paid Plans</h4>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        {paidPlans.map((plan) => (
-                          <PlanCard
-                            key={plan.id}
-                            plan={plan}
-                            selected={form.watch('planId') === plan.id}
-                            onSelect={() => {
-                              form.setValue('planId', plan.id);
-                              setSelectedPlan(plan);
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    
-                    {/* Enterprise plans */}
-                    <div>
-                      <h4 className="text-md font-medium mb-3">Enterprise</h4>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        {enterprisePlans.map((plan) => (
-                          <PlanCard
-                            key={plan.id}
-                            plan={plan}
-                            selected={form.watch('planId') === plan.id}
-                            onSelect={() => {
-                              form.setValue('planId', plan.id);
-                              setSelectedPlan(plan);
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
+                    <Tabs defaultValue="free" onValueChange={(val) => setPlanTab(val as 'free' | 'paid')}>
+                      <TabsList className="grid w-full grid-cols-2 mb-6">
+                        <TabsTrigger value="free">Free Plans</TabsTrigger>
+                        <TabsTrigger value="paid">Paid Plans</TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="free" className="pt-2">
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          {freePlans.map((plan) => (
+                            <PlanCard
+                              key={plan.id}
+                              plan={plan}
+                              selected={form.watch('planId') === plan.id}
+                              onSelect={() => {
+                                form.setValue('planId', plan.id);
+                                setSelectedPlan(plan);
+                              }}
+                            />
+                          ))}
+                        </div>
+                        {freePlans.length === 0 && (
+                          <div className="text-center py-8 text-muted-foreground">
+                            No free plans available at this time.
+                          </div>
+                        )}
+                      </TabsContent>
+                      
+                      <TabsContent value="paid" className="pt-2">
+                        {/* Paid plans */}
+                        <div className="mb-8">
+                          <h4 className="text-md font-medium mb-3">Standard Plans</h4>
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            {paidPlans.map((plan) => (
+                              <PlanCard
+                                key={plan.id}
+                                plan={plan}
+                                selected={form.watch('planId') === plan.id}
+                                onSelect={() => {
+                                  form.setValue('planId', plan.id);
+                                  setSelectedPlan(plan);
+                                }}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        
+                        {/* Enterprise plans */}
+                        <div>
+                          <h4 className="text-md font-medium mb-3">Enterprise Plans</h4>
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            {enterprisePlans.map((plan) => (
+                              <PlanCard
+                                key={plan.id}
+                                plan={plan}
+                                selected={form.watch('planId') === plan.id}
+                                onSelect={() => {
+                                  form.setValue('planId', plan.id);
+                                  setSelectedPlan(plan);
+                                }}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </TabsContent>
+                    </Tabs>
                   </div>
                   
                   {/* Error display */}
@@ -469,7 +583,17 @@ export default function NewOrganizationPage() {
                   )}
                   
                   {/* Submit button */}
-                  <div className="flex justify-end">
+                  <div className="flex justify-end gap-2">
+                    {selectedPlan && (selectedPlan.price > 0 || selectedPlan.isCustom) && !selectedPlan.trialDays && (
+                      <Button 
+                        type="button" 
+                        variant="outline"
+                        onClick={() => router.back()}
+                        className="w-full sm:w-auto"
+                      >
+                        Cancel
+                      </Button>
+                    )}
                     <Button 
                       type="submit" 
                       disabled={isSubmitting}
@@ -482,6 +606,10 @@ export default function NewOrganizationPage() {
                             <div className="h-5 w-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
                           </span>
                         </>
+                      ) : selectedPlan && selectedPlan.isCustom ? (
+                        'Contact Sales'
+                      ) : selectedPlan && selectedPlan.price > 0 && !selectedPlan.trialDays ? (
+                        'Continue to Billing'
                       ) : (
                         'Create Organization'
                       )}

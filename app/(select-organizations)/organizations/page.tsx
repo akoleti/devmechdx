@@ -61,9 +61,7 @@ export default function OrganizationsPage() {
 
     if (sessionStatus === 'authenticated') {
       fetchOrganizations();
-    } else if (sessionStatus === 'unauthenticated') {
-      router.push('/login');
-    }
+    } 
   }, [sessionStatus, storeOrganizations, setOrganizations, router]);
 
   // Handle organization selection

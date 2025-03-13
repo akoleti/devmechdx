@@ -12,11 +12,14 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building, Save, ArrowLeft, Edit, Check, X, CheckCircle } from 'lucide-react';
+import { Building, Save, ArrowLeft, Edit, Check, X, CheckCircle, UserPlus, Mail, Info, AlertCircle, XCircle, Loader, Send } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Define the organization schema
 const organizationSchema = z.object({
@@ -37,6 +40,22 @@ type OrganizationFormValues = z.infer<typeof organizationSchema>;
 
 // Define available plans
 const plans = [
+  {
+    id: 'free',
+    name: 'Free',
+    description: 'Basic features for small operations',
+    price: 'Free',
+    period: '',
+    features: [
+      'Up to 2 HVAC units',
+      'Basic monitoring',
+      'Standard support',
+      'Mobile app access',
+      'Monthly reports'
+    ],
+    recommended: false,
+    signupUrl: '/signup/free'
+  },
   {
     id: 'starter',
     name: 'Starter',
@@ -99,6 +118,43 @@ const plans = [
   }
 ];
 
+// Define a type for organization users
+type OrganizationUser = {
+  id: string;
+  name: string | null;
+  email: string;
+  image: string | null;
+  role: string;
+  isActive: boolean;
+  isVerified: boolean;
+  joinedAt: string;
+};
+
+// Define invite form schema
+const inviteSchema = z.object({
+  email: z.string().email({ message: "Please enter a valid email address." }),
+  role: z.string({ required_error: "Please select a role." }),
+  message: z.string().optional(),
+});
+
+type InviteFormValues = z.infer<typeof inviteSchema>;
+
+// After the OrganizationUser type, add:
+type OrganizationInvitation = {
+  id: string;
+  email: string;
+  role: string;
+  status: string;
+  expiresAt: string;
+  createdAt: string;
+  invitedBy: {
+    id: string;
+    name: string;
+    email: string;
+    image: string | null;
+  };
+};
+
 export default function OrganizationPage() {
   const { data: session, update } = useSession();
   const router = useRouter();
@@ -109,6 +165,16 @@ export default function OrganizationPage() {
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annual'>('monthly');
+  const [planTab, setPlanTab] = useState<'free' | 'paid'>('free');
+  const [users, setUsers] = useState<OrganizationUser[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+  const [isInviting, setIsInviting] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [invitations, setInvitations] = useState<OrganizationInvitation[]>([]);
+  const [loadingInvitations, setLoadingInvitations] = useState(false);
+  const [resendingInvitation, setResendingInvitation] = useState<string | null>(null);
+  const [cancelingInvitation, setCancelingInvitation] = useState<string | null>(null);
 
   // Create a form with default values
   const form = useForm<OrganizationFormValues>({
@@ -125,6 +191,16 @@ export default function OrganizationPage() {
       phone: '',
       email: '',
       website: '',
+    },
+  });
+
+  // Initialize invite form
+  const inviteForm = useForm<InviteFormValues>({
+    resolver: zodResolver(inviteSchema),
+    defaultValues: {
+      email: '',
+      role: 'USER',
+      message: '',
     },
   });
 
@@ -182,10 +258,13 @@ export default function OrganizationPage() {
             let planId = data.organization.plan.toLowerCase();
             
             // Handle potential UPPERCASE plan IDs like "STARTER" -> "starter"
-            if (planId === "starter" || planId === "professional" || planId === "enterprise") {
+            if (planId === "free" || planId === "starter" || planId === "professional" || planId === "enterprise") {
               setSelectedPlan(planId);
             } 
             // Handle potential full plan names like "Starter Plan" -> "starter"
+            else if (planId.includes("free")) {
+              setSelectedPlan("free");
+            }
             else if (planId.includes("starter")) {
               setSelectedPlan("starter");
             } 
@@ -211,8 +290,10 @@ export default function OrganizationPage() {
                   console.log("Found plan in description JSON:", descData.plan);
                   // Set the plan using the same logic as above
                   let planId = descData.plan.toLowerCase();
-                  if (planId === "starter" || planId === "professional" || planId === "enterprise") {
+                  if (planId === "free" || planId === "starter" || planId === "professional" || planId === "enterprise") {
                     setSelectedPlan(planId);
+                  } else if (planId.includes("free")) {
+                    setSelectedPlan("free");
                   } else if (planId.includes("starter")) {
                     setSelectedPlan("starter");
                   } else if (planId.includes("professional")) {
@@ -242,6 +323,19 @@ export default function OrganizationPage() {
       fetchOrganizationData();
     }
   }, [session, update, form]);
+
+  // Set the correct tab based on selected plan
+  useEffect(() => {
+    if (selectedPlan) {
+      // If selected plan is free, switch to free tab
+      if (selectedPlan === 'free') {
+        setPlanTab('free');
+      } else {
+        // If it's a paid plan, switch to paid tab
+        setPlanTab('paid');
+      }
+    }
+  }, [selectedPlan]);
 
   // Handle form submission
   const onSubmit = async (values: OrganizationFormValues) => {
@@ -381,6 +475,52 @@ export default function OrganizationPage() {
     const plan = plans.find(p => p.id === planId);
     if (!plan) return;
 
+    // For free plan, update directly via API
+    if (planId === 'free') {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`/api/organizations/${session.user.currentOrganization.id}/plan`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            plan: 'free',
+            billingPeriod: 'MONTHLY'
+          }),
+        });
+        
+        if (response.ok) {
+          setIsUpgradeDialogOpen(false);
+          setSelectedPlan('free');
+          toast({
+            title: "Plan Updated",
+            description: "Your organization has been successfully downgraded to the Free plan.",
+            variant: "default",
+          });
+          
+          // Refresh organization data
+          hasRefreshedRef.current = false;
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to update your plan. Please try again.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error('Error updating plan:', error);
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
     // For Enterprise plan, redirect to contact page
     if (planId === 'enterprise') {
       router.push('/contact');
@@ -401,12 +541,15 @@ export default function OrganizationPage() {
 
   // Open plan selection
   const openPlanSelection = () => {
-    // Either show dialog or directly redirect to the pricing page
-    // Option 1: Show dialog
-    setIsUpgradeDialogOpen(true);
+    // Set the default tab based on whether the user has a free plan or not
+    if (selectedPlan === 'free') {
+      setPlanTab('paid');  // If they're on free plan, default to showing paid plans
+    } else {
+      setPlanTab('free');  // If they're on a paid plan, default to showing free plans
+    }
     
-    // Option 2: Redirect to pricing page
-    // router.push('/pricing');
+    // Show the dialog
+    setIsUpgradeDialogOpen(true);
   };
 
   // Go back to dashboard
@@ -472,7 +615,7 @@ export default function OrganizationPage() {
   const getCurrentPlanDisplay = () => {
     console.log("Current selected plan:", selectedPlan);
     
-    if (selectedPlan && selectedPlan !== 'free') {
+    if (selectedPlan) {
       const plan = plans.find(p => p.id === selectedPlan);
       if (plan) {
         console.log("Matched plan:", plan.name);
@@ -570,6 +713,217 @@ export default function OrganizationPage() {
       : new Date().toLocaleDateString();
   };
 
+  // Get filtered plans based on tab
+  const getFilteredPlans = () => {
+    if (planTab === 'free') {
+      return plans.filter(plan => plan.id === 'free');
+    } else {
+      return plans.filter(plan => plan.id !== 'free');
+    }
+  };
+
+  // Fetch organization users
+  const fetchOrganizationUsers = async () => {
+    if (!session?.user?.currentOrganization?.id) return;
+    
+    setIsLoadingUsers(true);
+    try {
+      const response = await fetch(`/api/organizations/${session.user.currentOrganization.id}/users`);
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data.users);
+      } else {
+        console.error('Failed to fetch organization users');
+      }
+    } catch (error) {
+      console.error('Error fetching organization users:', error);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
+
+  // Fetch users when tab changes to "members"
+  const handleTabChange = (value: string) => {
+    if (value === 'members') {
+      fetchOrganizationUsers();
+    }
+  };
+
+  // Handle invite submission
+  const handleInvite = async (data: InviteFormValues) => {
+    if (!session?.user?.currentOrganization?.id) {
+      toast({
+        title: "Error",
+        description: "No organization selected. Please select an organization first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsInviting(true);
+    setInviteError(null);
+
+    try {
+      const response = await fetch(`/api/organizations/${session.user.currentOrganization.id}/invitations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const responseData = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Invitation Sent",
+          description: `An invitation has been sent to ${data.email}.`,
+          variant: "default",
+          className: "bg-green-50 border-green-200 text-green-800",
+        });
+        inviteForm.reset();
+        setIsInviteDialogOpen(false);
+        // Refresh users list
+        fetchOrganizationUsers();
+        fetchOrganizationInvitations();
+      } else {
+        setInviteError(responseData.error || 'Failed to send invitation');
+      }
+    } catch (error) {
+      console.error('Error sending invitation:', error);
+      setInviteError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsInviting(false);
+    }
+  };
+
+  // Get role display name
+  const getRoleDisplay = (role: string) => {
+    switch (role) {
+      case 'ADMINISTRATOR': return 'Administrator';
+      case 'MANAGER': return 'Manager';
+      case 'SUPERVISOR': return 'Supervisor';
+      case 'TECHNICIAN': return 'Technician';
+      case 'DISPATCHER': return 'Dispatcher';
+      case 'ESTIMATOR': return 'Estimator';
+      case 'CUSTOMER': return 'Customer';
+      case 'USER': return 'User';
+      default: return role;
+    }
+  };
+
+  // Get role badge variant
+  const getRoleBadgeVariant = (role: string) => {
+    switch (role) {
+      case 'ADMINISTRATOR': return 'destructive';
+      case 'MANAGER': return 'default';
+      case 'SUPERVISOR': return 'secondary';
+      case 'TECHNICIAN': return 'outline';
+      case 'DISPATCHER': return 'outline';
+      case 'ESTIMATOR': return 'outline';
+      case 'CUSTOMER': return 'outline';
+      case 'USER': return 'outline';
+      default: return 'outline';
+    }
+  };
+
+  // Check if user can invite new members
+  const canInviteMembers = ['ADMINISTRATOR', 'MANAGER'].includes(session?.user?.currentRole || '');
+
+  // Fetch organization invitations
+  const fetchOrganizationInvitations = async () => {
+    if (!session?.user?.currentOrganization?.id) return;
+    
+    setLoadingInvitations(true);
+    try {
+      const response = await fetch(`/api/organizations/${session.user?.currentOrganization.id}/invitations`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch invitations');
+      }
+      const data = await response.json();
+      setInvitations(data.invitations || []);
+    } catch (error) {
+      console.error('Error fetching invitations:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load invitations",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingInvitations(false);
+    }
+  };
+
+  // Add resendInvitation function
+  const resendInvitation = async (invitationId: string) => {
+    if (!session?.user?.currentOrganization?.id) return;
+    
+    setResendingInvitation(invitationId);
+    try {
+      const response = await fetch(`/api/organizations/${session.user?.currentOrganization.id}/invitations/${invitationId}/resend`, {
+        method: 'POST',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to resend invitation');
+      }
+      
+      toast({
+        title: "Success",
+        description: "Invitation has been resent",
+      });
+    } catch (error) {
+      console.error('Error resending invitation:', error);
+      toast({
+        title: "Error",
+        description: "Failed to resend invitation",
+        variant: "destructive",
+      });
+    } finally {
+      setResendingInvitation(null);
+    }
+  };
+
+  // Add cancelInvitation function
+  const cancelInvitation = async (invitationId: string) => {
+    if (!session?.user?.currentOrganization?.id) return;
+    
+    setCancelingInvitation(invitationId);
+    try {
+      const response = await fetch(`/api/organizations/${session.user?.currentOrganization.id}/invitations/${invitationId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to cancel invitation');
+      }
+      
+      // Remove the invitation from the list
+      setInvitations(invitations.filter(inv => inv.id !== invitationId));
+      
+      toast({
+        title: "Success",
+        description: "Invitation has been canceled",
+      });
+    } catch (error) {
+      console.error('Error canceling invitation:', error);
+      toast({
+        title: "Error",
+        description: "Failed to cancel invitation",
+        variant: "destructive",
+      });
+    } finally {
+      setCancelingInvitation(null);
+    }
+  };
+
+  // Fix the useEffect to not depend on selectedTab
+  useEffect(() => {
+    if (session?.user?.currentOrganization?.id) {
+      fetchOrganizationInvitations();
+    }
+  }, [session?.user?.currentOrganization?.id]);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center mb-6">
@@ -599,7 +953,7 @@ export default function OrganizationPage() {
           </CardContent>
         </Card>
       ) : (
-        <Tabs defaultValue="details">
+        <Tabs defaultValue="details" onValueChange={handleTabChange}>
           <TabsList className="mb-6">
             <TabsTrigger value="details">Organization Details</TabsTrigger>
             <TabsTrigger value="members">Members</TabsTrigger>
@@ -1011,15 +1365,209 @@ export default function OrganizationPage() {
           <TabsContent value="members">
             <Card>
               <CardHeader>
-                <CardTitle>Organization Members</CardTitle>
-                <CardDescription>
-                  Manage members and their roles in your organization
-                </CardDescription>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle>Organization Members</CardTitle>
+                    <CardDescription>
+                      Manage members and their roles in your organization
+                    </CardDescription>
+                  </div>
+                  {canInviteMembers && (
+                    <Button
+                      onClick={() => setIsInviteDialogOpen(true)}
+                      className="flex items-center"
+                    >
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Invite Member
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
-                <p className="text-center py-12 text-gray-500">
-                  Member management functionality will be implemented in a future update.
-                </p>
+                {isLoadingUsers ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
+                ) : users.length === 0 ? (
+                  <div className="text-center py-12">
+                    <UserPlus className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+                    <h3 className="text-lg font-medium mb-2">No members found</h3>
+                    <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                      {canInviteMembers 
+                        ? "Your organization doesn't have any members yet. Invite team members to collaborate."
+                        : "Your organization doesn't have any members yet. Ask an administrator to invite team members."}
+                    </p>
+                    {canInviteMembers && (
+                      <Button
+                        onClick={() => setIsInviteDialogOpen(true)}
+                        className="flex items-center mx-auto"
+                      >
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Invite Member
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>User</TableHead>
+                          <TableHead>Role</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Joined</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {users.map((user) => (
+                          <TableRow key={user.id}>
+                            <TableCell className="py-4">
+                              <div className="flex items-center gap-3">
+                                <Avatar>
+                                  <AvatarImage src={user.image || undefined} alt={user.name || user.email} />
+                                  <AvatarFallback>
+                                    {user.name
+                                      ? user.name.split(' ').map(n => n[0]).join('').toUpperCase()
+                                      : user.email.substring(0, 2).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="font-medium">{user.name || 'Unnamed User'}</p>
+                                  <p className="text-sm text-muted-foreground">{user.email}</p>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={getRoleBadgeVariant(user.role)}>{getRoleDisplay(user.role)}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              {user.isActive ? (
+                                <Badge className="bg-green-100 text-green-800 hover:bg-green-100 border-green-200">Active</Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-gray-500">Inactive</Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {new Date(user.joinedAt).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => resendInvitation(user.id)}
+                                  disabled={!!resendingInvitation}
+                                >
+                                  {resendingInvitation === user.id ? (
+                                    <Loader className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Send className="h-4 w-4" />
+                                  )}
+                                  <span className="sr-only">Resend</span>
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => cancelInvitation(user.id)}
+                                  disabled={!!cancelingInvitation}
+                                >
+                                  {cancelingInvitation === user.id ? (
+                                    <Loader className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <XCircle className="h-4 w-4" />
+                                  )}
+                                  <span className="sr-only">Cancel</span>
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+
+                {/* Pending Invitations Section */}
+                {canInviteMembers && invitations.length > 0 && (
+                  <div className="mt-6">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-lg font-medium">Pending Invitations</h3>
+                    </div>
+                    <div className="rounded-md border">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Role</TableHead>
+                            <TableHead>Invited By</TableHead>
+                            <TableHead>Expires</TableHead>
+                            <TableHead>Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {invitations.map((invitation) => (
+                            <TableRow key={invitation.id}>
+                              <TableCell className="flex items-center gap-2">
+                                <Mail className="h-4 w-4 text-muted-foreground" />
+                                {invitation.email}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="capitalize">
+                                  {invitation.role.toLowerCase()}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                {invitation.invitedBy.name || invitation.invitedBy.email}
+                              </TableCell>
+                              <TableCell>
+                                {new Date(invitation.expiresAt).toLocaleDateString()}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => resendInvitation(invitation.id)}
+                                    disabled={!!resendingInvitation}
+                                  >
+                                    {resendingInvitation === invitation.id ? (
+                                      <Loader className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                      <Send className="h-4 w-4" />
+                                    )}
+                                    <span className="sr-only">Resend</span>
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => cancelInvitation(invitation.id)}
+                                    disabled={!!cancelingInvitation}
+                                  >
+                                    {cancelingInvitation === invitation.id ? (
+                                      <Loader className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                      <XCircle className="h-4 w-4" />
+                                    )}
+                                    <span className="sr-only">Cancel</span>
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Loading state for invitations */}
+                {loadingInvitations && (
+                  <div className="flex justify-center items-center py-4">
+                    <Loader className="h-6 w-6 text-primary animate-spin" />
+                    <span className="ml-2">Loading invitations...</span>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -1046,45 +1594,65 @@ export default function OrganizationPage() {
       <Dialog open={isUpgradeDialogOpen} onOpenChange={setIsUpgradeDialogOpen}>
         <DialogContent className="sm:max-w-3xl overflow-y-auto max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle className="text-2xl">Upgrade Your Plan</DialogTitle>
+            <DialogTitle className="text-2xl">Select Your Plan</DialogTitle>
             <DialogDescription>
               Choose the plan that best fits your organization's needs.
             </DialogDescription>
           </DialogHeader>
           
-          {/* Billing Toggle */}
-          <div className="mt-4 flex justify-center">
-            <div className="bg-white rounded-full p-1 shadow-sm border">
-              <div className="flex items-center space-x-4 px-4">
-                <button
-                  onClick={() => setBillingPeriod('monthly')}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                    billingPeriod === 'monthly'
-                      ? 'bg-[#0F62FE] text-white'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  Monthly
-                </button>
-                <button
-                  onClick={() => setBillingPeriod('annual')}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                    billingPeriod === 'annual'
-                      ? 'bg-[#0F62FE] text-white'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  Annual
-                  <span className="ml-2 inline-block px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
-                    Save 16%
-                  </span>
-                </button>
-              </div>
-            </div>
+          {/* Plan Type Tabs */}
+          <div className="mt-4">
+            <Tabs defaultValue="free" onValueChange={(val) => setPlanTab(val as 'free' | 'paid')}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="free">Free Plans</TabsTrigger>
+                <TabsTrigger value="paid">Paid Plans</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="free" className="pt-4">
+                {getFilteredPlans().length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No free plans available at this time.
+                  </div>
+                ) : null}
+              </TabsContent>
+              
+              <TabsContent value="paid" className="pt-4">
+                {/* Billing Toggle - Only show for paid plans */}
+                <div className="flex justify-center mb-6">
+                  <div className="bg-white rounded-full p-1 shadow-sm border">
+                    <div className="flex items-center space-x-4 px-4">
+                      <button
+                        onClick={() => setBillingPeriod('monthly')}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                          billingPeriod === 'monthly'
+                            ? 'bg-[#0F62FE] text-white'
+                            : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                      >
+                        Monthly
+                      </button>
+                      <button
+                        onClick={() => setBillingPeriod('annual')}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                          billingPeriod === 'annual'
+                            ? 'bg-[#0F62FE] text-white'
+                            : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                      >
+                        Annual
+                        <span className="ml-2 inline-block px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
+                          Save 16%
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-6">
-            {plans.map((plan) => (
+            {getFilteredPlans().map((plan) => (
               <div 
                 key={plan.id} 
                 className={`rounded-lg border p-6 relative ${
@@ -1139,15 +1707,21 @@ export default function OrganizationPage() {
                 </ul>
                 
                 <Button
-                  variant={selectedPlan === plan.id ? "secondary" : "default"}
+                  variant={selectedPlan === plan.id 
+                    ? "secondary" 
+                    : plan.id === 'free' 
+                      ? "outline" 
+                      : "default"}
                   className={`w-full ${plan.recommended ? 'bg-[#0F62FE] hover:bg-[#0F62FE]/90' : ''}`}
-                  disabled={selectedPlan === plan.id}
+                  disabled={selectedPlan === plan.id && plan.id !== 'free'}
                   onClick={() => handleUpgradePlan(plan.id)}
                 >
                   {selectedPlan === plan.id ? (
                     'Current Plan'
                   ) : plan.id === 'enterprise' ? (
                     'Contact Sales'
+                  ) : plan.id === 'free' ? (
+                    'Select Free Plan'
                   ) : (
                     'Get Started'
                   )}
@@ -1167,6 +1741,113 @@ export default function OrganizationPage() {
               Cancel
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Invite Member Dialog */}
+      <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Invite Team Member</DialogTitle>
+            <DialogDescription>
+              Send an invitation to join your organization. They'll receive an email with instructions.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...inviteForm}>
+            <form onSubmit={inviteForm.handleSubmit(handleInvite)} className="space-y-6">
+              <FormField
+                control={inviteForm.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center">
+                        <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <Input placeholder="colleague@example.com" {...field} />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={inviteForm.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="USER">User</SelectItem>
+                        <SelectItem value="MANAGER">Manager</SelectItem>
+                        {session?.user?.currentRole === 'ADMINISTRATOR' && (
+                          <SelectItem value="ADMINISTRATOR">Administrator</SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      This determines what permissions they'll have in your organization.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={inviteForm.control}
+                name="message"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Personal Message (Optional)</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Optional message to include in the invitation email"
+                        className="min-h-[80px]"
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              {inviteError && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{inviteError}</AlertDescription>
+                </Alert>
+              )}
+              
+              <DialogFooter className="gap-2 sm:gap-0">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsInviteDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isInviting}>
+                  {isInviting ? (
+                    <>
+                      <span className="mr-2">Sending...</span>
+                      <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full"></div>
+                    </>
+                  ) : (
+                    'Send Invitation'
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
     </div>

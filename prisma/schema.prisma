@@ -33,6 +33,7 @@ model User {
   ownedOrganizations    Organization[]
   organizations         OrganizationUser[]
   session               Session[]
+  sentInvitations       OrganizationInvitation[] @relation("SentInvitations")
 }
 
 model Account {
@@ -99,6 +100,7 @@ model Organization {
   users         OrganizationUser[]
   sessions      Session[]
   vendors       Vendor[]
+  invitations   OrganizationInvitation[]
 }
 
 model Vendor {
@@ -145,6 +147,22 @@ model OrganizationUser {
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([userId, organizationId])
+}
+
+model OrganizationInvitation {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String       @db.Uuid
+  email          String
+  role           Role         @default(USER)
+  token          String       @unique
+  message        String?
+  status         InvitationStatus @default(PENDING)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  expiresAt      DateTime
+  invitedById    String       @db.Uuid
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  invitedBy      User         @relation("SentInvitations", fields: [invitedById], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model Activity {
@@ -459,4 +477,11 @@ enum EquipmentType {
   MRI_CHILLER
   HOT_WATER_BOILER
   OTHER
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
 }
