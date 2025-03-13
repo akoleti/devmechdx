@@ -1,13 +1,12 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building, ArrowRight, LayoutGrid, PlusCircle } from "lucide-react";
+import { Building, ArrowRight, PlusCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import Footer from '@/components/navigation/Footer';
 import useSessionStore from '@/app/stores/sessionStore';
 
 interface Organization {
@@ -19,61 +18,32 @@ interface Organization {
 
 export default function OrganizationsPage() {
   const router = useRouter();
-  // Get session data from our store
-  const { status, user, organizations: storeOrganizations, setOrganizations, setCurrentOrganization } = useSessionStore();
-
-  console.log('status:', status);
-  console.log('user:', user);
-  console.log('organizations:', storeOrganizations);
+  const { data: session, status: sessionStatus, update } = useSession();
+  const { organizations: storeOrganizations, setOrganizations, setCurrentOrganization } = useSessionStore();
   
-  const [organizations, setLocalOrganizations] = useState<Organization[]>(storeOrganizations || []);
+  const [organizations, setLocalOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // Set a timeout to ensure we eventually stop loading
-  useEffect(() => {
-    // Clear any existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    
-    // Force exit loading state after 3 seconds
-    timeoutRef.current = setTimeout(() => {
-      if (pageLoading) {
-        setPageLoading(false);
-      }
-    }, 3000);
-    
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [pageLoading]);
-  
+  const hasAttemptedFetch = useRef(false);
+
   // Effect to handle organization data
   useEffect(() => {
     const fetchOrganizations = async () => {
+      if (hasAttemptedFetch.current) return;
+      
       try {
-        // First check if we have organizations in our store or session
+        hasAttemptedFetch.current = true;
+
+        // First check if we have organizations in store
         if (storeOrganizations?.length > 0) {
           setLocalOrganizations(storeOrganizations);
           setPageLoading(false);
           return;
         }
-        
-        if (user?.organizations) {
-          const orgs = user.organizations;
-          setOrganizations(orgs);
-          setLocalOrganizations(orgs);
-          setPageLoading(false);
-          return;
-        }
 
-        // If authenticated but no organizations yet, try getting them from the API
-        if (status === 'authenticated') {
-          const response = await fetch('/api/user/organizations');
+        // If authenticated, try getting them from the API
+        if (sessionStatus === 'authenticated') {
+          const response = await fetch('/api/organizations');
           if (response.ok) {
             const data = await response.json();
             const orgs = data.organizations || [];
@@ -81,31 +51,70 @@ export default function OrganizationsPage() {
             setLocalOrganizations(orgs);
           }
           setPageLoading(false);
-        } else if (status === 'unauthenticated') {
-          // If not authenticated, we can exit loading state
-          setPageLoading(false);
         }
       } catch (error) {
         console.error('Error fetching organizations:', error);
+      } finally {
         setPageLoading(false);
       }
     };
 
-    // Only run if we're authenticated or loading
-    if (status !== 'unauthenticated') {
+    if (sessionStatus === 'authenticated') {
       fetchOrganizations();
-    } else {
-      setPageLoading(false);
+    } else if (sessionStatus === 'unauthenticated') {
+      router.push('/login');
     }
-  }, [status, user, storeOrganizations, setOrganizations]);
+  }, [sessionStatus, storeOrganizations, setOrganizations, router]);
 
-  // Handle navigation redirection when unauthenticated
-  
-
-
+  // Handle organization selection
+  const handleOrganizationSelect = async (orgId: string) => {
+    try {
+      setLoading(true);
+      const selectedOrg = organizations.find(org => org.id === orgId);
+      if (selectedOrg) {
+        // First update the current organization in the session store
+        await setCurrentOrganization(selectedOrg.id);
+        
+        // Store the selected organization temporarily in localStorage to display on dashboard
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('selectedOrganizationName', selectedOrg.name);
+        }
+        
+        // Call the API to update the session
+        const response = await fetch('/api/user/set-organization', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ organizationId: selectedOrg.id }),
+        });
+        
+        if (!response.ok) {
+          console.error('Failed to update organization in session');
+        }
+        
+        // Update the session with the current organization
+        await update({
+          currentOrganization: {
+            id: selectedOrg.id,
+            name: selectedOrg.name,
+            role: selectedOrg.role
+          },
+          currentRole: selectedOrg.role,
+        });
+        
+        // Then redirect to dashboard
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      console.error('Error selecting organization:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Show loading state while session is loading
-  if (status === 'loading' || pageLoading) {
+  if (sessionStatus === 'loading' || pageLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
@@ -116,38 +125,32 @@ export default function OrganizationsPage() {
     );
   }
 
- 
-
   return (
-    <>
+    <div className="min-h-screen pb-12">
       {/* Header */}
-        <div className="container mx-auto px-4 py-4 flex justify-end">
-          <div className="flex items-center gap-4">
+      <div className="bg-white shadow-sm py-8 mb-8">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Organizations</h1>
+              <p className="text-gray-500 mt-1">Select an organization to continue</p>
+            </div>
             {organizations.length > 0 && (
               <Button 
                 onClick={() => router.push('/organizations/new')} 
-                size="sm"
-                className="flex items-center ml-auto"
+                className="flex items-center mt-4 md:mt-0"
                 type="button"
               >
                 <PlusCircle className="mr-2 h-4 w-4" />
                 New Organization
               </Button>
             )}
-           
           </div>
         </div>
+      </div>
 
       {/* Main content */}
-      <main className="container mx-auto py-12 px-4">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-3">Welcome to MechDX</h1>
-          <p className="text-gray-600 text-lg mb-2">Please select an organization to continue</p>
-          <p className="text-gray-500 text-sm max-w-md mx-auto">
-            You have access to the following organizations. Choose one to set your working context.
-          </p>
-        </div>
-
+      <div className="container mx-auto px-4">
         {organizations.length === 0 ? (
           <div className="max-w-md mx-auto text-center p-8 border rounded-lg bg-white shadow-sm">
             <Building className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -173,7 +176,7 @@ export default function OrganizationsPage() {
             </div>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
             {organizations.map((org) => (
               <Card key={org.id} className="hover:shadow-md transition-shadow bg-white border border-gray-200">
                 <CardHeader className="pb-3">
@@ -197,7 +200,7 @@ export default function OrganizationsPage() {
                 </CardContent>
                 <CardFooter>
                   <Button 
-                    onClick={() => console.log(org.id)} 
+                    onClick={() => handleOrganizationSelect(org.id)} 
                     disabled={loading}
                     className="w-full relative"
                     type="button"
@@ -221,9 +224,8 @@ export default function OrganizationsPage() {
             ))}
           </div>
         )}
-      </main>
-
-    </>
+      </div>
+    </div>
   );
 }
 

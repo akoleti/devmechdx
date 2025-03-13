@@ -87,12 +87,23 @@ export const config: NextAuthConfig = {
             if (token.currentOrganization) {
                 session.user.currentOrganization = token.currentOrganization;
                 session.user.currentRole = token.currentRole;
+                console.log("Setting session.user.currentOrganization:", token.currentOrganization);
             }
             
             if (trigger === "update") {
                 session.user.name = token.name as string;
                 session.user.email = token.email as string;
                 session.user.role = token.role as Role;
+                
+                // If update includes currentOrganization, set it in the session
+                if (session.currentOrganization) {
+                    session.user.currentOrganization = session.currentOrganization;
+                    session.user.currentRole = session.currentRole;
+                    // Clean up the session object
+                    delete session.currentOrganization;
+                    delete session.currentRole;
+                    console.log("Updated session with organization:", session.user.currentOrganization);
+                }
             }
             return session;
         },
@@ -107,6 +118,7 @@ export const config: NextAuthConfig = {
             if (trigger === "update" && session?.currentOrganization) {
                 token.currentOrganization = session.currentOrganization;
                 token.currentRole = session.currentRole;
+                console.log("Updating token with organization:", session.currentOrganization);
             }
             
             return token;

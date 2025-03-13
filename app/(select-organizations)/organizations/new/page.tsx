@@ -13,7 +13,8 @@ import {
   FormField, 
   FormItem, 
   FormLabel, 
-  FormMessage 
+  FormMessage,
+  FormDescription
 } from '@/components/ui/form';
 import { 
   Select,
@@ -23,11 +24,12 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Building, ArrowLeft, LayoutGrid, Check, Info } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { Building, ArrowLeft, LayoutGrid, Check, Info, AlertCircle } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Form validation schema
 const formSchema = z.object({
@@ -151,6 +153,63 @@ interface Plan {
   isCustom: boolean;
 }
 
+interface PlanCardProps {
+  plan: Plan;
+  selected: boolean;
+  onSelect: () => void;
+}
+
+const PlanCard = ({ plan, selected, onSelect }: PlanCardProps) => {
+  return (
+    <div 
+      className={`border rounded-lg p-4 cursor-pointer transition-all ${
+        selected ? 'border-blue-600 ring-2 ring-blue-200' : 'border-gray-200 hover:border-blue-400'
+      }`}
+      onClick={onSelect}
+    >
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h3 className="text-lg font-semibold">{plan.name}</h3>
+          <p className="text-sm text-gray-500">{plan.description}</p>
+        </div>
+        <div className="text-right">
+          {plan.isCustom ? (
+            <>
+              <div className="text-2xl font-bold">Custom</div>
+              <div className="text-sm text-gray-500">Contact sales</div>
+            </>
+          ) : plan.price === 0 ? (
+            <div className="text-2xl font-bold">Free</div>
+          ) : (
+            <>
+              <div className="text-2xl font-bold">${plan.price}</div>
+              <div className="text-sm text-gray-500">/month</div>
+              {plan.trialDays && (
+                <div className="text-sm text-blue-600 font-medium mt-1">
+                  {plan.trialDays}-day free trial
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+      <ul className="space-y-2">
+        {plan.features?.slice(0, 3).map((feature, index) => (
+          <li key={index} className="flex items-center text-sm text-gray-600">
+            <Check className="h-4 w-4 text-blue-500 mr-2 flex-shrink-0" />
+            <span>{feature}</span>
+          </li>
+        ))}
+        {plan.features && plan.features.length > 3 && (
+          <li className="text-sm text-gray-500">
+            +{plan.features.length - 3} more features
+          </li>
+        )}
+      </ul>
+    </div>
+  );
+};
+
 export default function NewOrganizationPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -258,286 +317,182 @@ export default function NewOrganizationPage() {
   const enterprisePlans = PLANS_DATA.filter(plan => plan.isCustom);
 
   return (
-    <>
-      {/* Main content */}
-      <main className="container mx-auto py-12 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            <Building className="h-12 w-12 text-primary mx-auto mb-4" />
-            <h1 className="text-2xl font-bold mb-2">Create New Organization</h1>
-            <p className="text-gray-500">
-              You'll be assigned as an administrator for this organization.
-            </p>
+    <div className="min-h-screen pb-12">
+      {/* Header */}
+      <div className="bg-white shadow-sm py-8 mb-8">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Create New Organization</h1>
+              <p className="text-gray-500 mt-1">Set up a new organization for your team</p>
+            </div>
+            <Button 
+              variant="outline"
+              onClick={() => router.back()} 
+              className="flex items-center mt-4 md:mt-0"
+              type="button"
+            >
+              Back to Organizations
+            </Button>
           </div>
+        </div>
+      </div>
 
-          <Card className="bg-white shadow-sm rounded-lg p-6 border border-gray-200">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Organization Name</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Enter organization name" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Organization Type</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
+      {/* Main content */}
+      <div className="container mx-auto px-4">
+        <div className="max-w-4xl mx-auto">
+          <Card>
+            <CardHeader>
+              <CardTitle>Organization Details</CardTitle>
+              <CardDescription>
+                Provide the basic information about your new organization
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                  {/* Organization name field */}
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Organization Name</FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select organization type" />
-                          </SelectTrigger>
+                          <Input placeholder="Enter organization name" {...field} />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="CUSTOMER">Customer</SelectItem>
-                          <SelectItem value="VENDOR">Vendor</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="planId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Select Plan</FormLabel>
-                      <Tabs defaultValue="free" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 mb-4">
-                          <TabsTrigger value="free">Free Plans</TabsTrigger>
-                          <TabsTrigger value="paid">Paid Plans</TabsTrigger>
-                        </TabsList>
-
-                        <TabsContent value="free" className="space-y-4">
-                          <RadioGroup
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                            className="grid gap-4"
-                          >
-                            {freePlans.map((plan) => (
-                              <div key={plan.id}>
-                                <RadioGroupItem
-                                  value={plan.id}
-                                  id={plan.id}
-                                  className="peer sr-only"
-                                />
-                                <label
-                                  htmlFor={plan.id}
-                                  className="block cursor-pointer"
-                                >
-                                  <Card className={`p-4 transition-all hover:border-primary peer-checked:border-primary peer-checked:ring-2 peer-checked:ring-primary`}>
-                                    <div className="flex justify-between items-start mb-4">
-                                      <div>
-                                        <h3 className="text-lg font-semibold">{plan.name}</h3>
-                                        <p className="text-sm text-gray-500">{plan.description}</p>
-                                      </div>
-                                      <div className="text-right">
-                                        {plan.trialDays ? (
-                                          <>
-                                            <div className="text-2xl font-bold">${plan.price}</div>
-                                            <div className="text-sm text-gray-500">/month</div>
-                                            <div className="text-sm text-primary font-medium mt-1">
-                                              {plan.trialDays}-day free trial
-                                            </div>
-                                          </>
-                                        ) : (
-                                          <>
-                                            <div className="text-2xl font-bold">Free</div>
-  
-                                          </>
-                                        )}
-                                      </div>
-                                    </div>
-                                    <ul className="space-y-2">
-                                      {plan.features?.map((feature, index) => (
-                                        <li key={index} className="flex items-center text-sm text-gray-600">
-                                          <Check className="h-4 w-4 text-primary mr-2 flex-shrink-0" />
-                                          <span className="flex items-center">
-                                            {feature}
-                                            {(feature.includes('Predictive maintenance') ||
-                                              feature.includes('Custom integration') ||
-                                              feature.includes('Multi-site management')) && (
-                                              <TooltipProvider>
-                                                <Tooltip>
-                                                  <TooltipTrigger>
-                                                    <Info className="h-4 w-4 ml-1 text-gray-400" />
-                                                  </TooltipTrigger>
-                                                  <TooltipContent>
-                                                    <p>
-                                                      {feature.includes('Predictive maintenance') && 
-                                                        'AI-powered maintenance recommendations based on equipment performance data'}
-                                                      {feature.includes('Custom integration') && 
-                                                        'Integration with your existing systems and workflows'}
-                                                      {feature.includes('Multi-site management') && 
-                                                        'Centralized management of multiple locations and facilities'}
-                                                    </p>
-                                                  </TooltipContent>
-                                                </Tooltip>
-                                              </TooltipProvider>
-                                            )}
-                                          </span>
-                                        </li>
-                                      ))}
-                                    </ul>
-                                    <Button
-                                      type="button"
-                                      variant={field.value === plan.id ? "default" : "outline"}
-                                      className="w-full mt-4"
-                                    >
-                                      {plan.trialDays ? `Start ${plan.trialDays}-day free trial` : 'Get Started'}
-                                    </Button>
-                                  </Card>
-                                </label>
-                              </div>
-                            ))}
-                          </RadioGroup>
-                        </TabsContent>
-
-                        <TabsContent value="paid" className="space-y-4">
-                          <RadioGroup
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                            className="grid gap-4"
-                          >
-                            {[...paidPlans, ...enterprisePlans].map((plan) => (
-                              <div key={plan.id}>
-                                <RadioGroupItem
-                                  value={plan.id}
-                                  id={plan.id}
-                                  className="peer sr-only"
-                                />
-                                <label
-                                  htmlFor={plan.id}
-                                  className="block cursor-pointer"
-                                >
-                                  <Card className={`p-4 transition-all hover:border-primary peer-checked:border-primary peer-checked:ring-2 peer-checked:ring-primary`}>
-                                    <div className="flex justify-between items-start mb-4">
-                                      <div>
-                                        <h3 className="text-lg font-semibold">{plan.name}</h3>
-                                        <p className="text-sm text-gray-500">{plan.description}</p>
-                                      </div>
-                                      <div className="text-right">
-                                        {plan.isCustom ? (
-                                          <>
-                                            <div className="text-2xl font-bold">Custom</div>
-                                            <div className="text-sm text-gray-500">Contact sales for pricing</div>
-                                          </>
-                                        ) : (
-                                          <>
-                                            <div className="text-2xl font-bold">${plan.price}</div>
-                                            <div className="text-sm text-gray-500">/month</div>
-                                            {plan.savings && (
-                                              <div className="text-green-600 text-sm">Save ${plan.savings}</div>
-                                            )}
-                                          </>
-                                        )}
-                                      </div>
-                                    </div>
-                                    <ul className="space-y-2">
-                                      {plan.features?.map((feature, index) => (
-                                        <li key={index} className="flex items-center text-sm text-gray-600">
-                                          <Check className="h-4 w-4 text-primary mr-2 flex-shrink-0" />
-                                          <span className="flex items-center">
-                                            {feature}
-                                            {(feature.includes('Predictive maintenance') ||
-                                              feature.includes('Custom integration') ||
-                                              feature.includes('Multi-site management')) && (
-                                              <TooltipProvider>
-                                                <Tooltip>
-                                                  <TooltipTrigger>
-                                                    <Info className="h-4 w-4 ml-1 text-gray-400" />
-                                                  </TooltipTrigger>
-                                                  <TooltipContent>
-                                                    <p>
-                                                      {feature.includes('Predictive maintenance') && 
-                                                        'AI-powered maintenance recommendations based on equipment performance data'}
-                                                      {feature.includes('Custom integration') && 
-                                                        'Integration with your existing systems and workflows'}
-                                                      {feature.includes('Multi-site management') && 
-                                                        'Centralized management of multiple locations and facilities'}
-                                                    </p>
-                                                  </TooltipContent>
-                                                </Tooltip>
-                                              </TooltipProvider>
-                                            )}
-                                          </span>
-                                        </li>
-                                      ))}
-                                    </ul>
-                                    {plan.isCustom ? (
-                                      <Button
-                                        type="button"
-                                        variant="outline"
-                                        className="w-full mt-4"
-                                        onClick={() => window.location.href = 'mailto:sales@example.com'}
-                                      >
-                                        Contact Sales
-                                      </Button>
-                                    ) : (
-                                      <Button
-                                        type="button"
-                                        variant={field.value === plan.id ? "default" : "outline"}
-                                        className="w-full mt-4"
-                                      >
-                                        Get Started
-                                      </Button>
-                                    )}
-                                  </Card>
-                                </label>
-                              </div>
-                            ))}
-                          </RadioGroup>
-                        </TabsContent>
-                      </Tabs>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {error && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
-                    {error}
+                        <FormDescription>
+                          This is the name that will be displayed for your organization.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  {/* Organization type field */}
+                  <FormField
+                    control={form.control}
+                    name="type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Organization Type</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select organization type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="CUSTOMER">Customer</SelectItem>
+                            <SelectItem value="PARTNER">Partner</SelectItem>
+                            <SelectItem value="SUPPLIER">Supplier</SelectItem>
+                            <SelectItem value="INTERNAL">Internal</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          This helps categorize your organization.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  {/* Plan selection */}
+                  <div>
+                    <h3 className="text-lg font-medium mb-4">Select a Plan</h3>
+                    
+                    {/* Free plans */}
+                    <div className="mb-8">
+                      <h4 className="text-md font-medium mb-3">Free Plans</h4>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        {freePlans.map((plan) => (
+                          <PlanCard
+                            key={plan.id}
+                            plan={plan}
+                            selected={form.watch('planId') === plan.id}
+                            onSelect={() => {
+                              form.setValue('planId', plan.id);
+                              setSelectedPlan(plan);
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Paid plans */}
+                    <div className="mb-8">
+                      <h4 className="text-md font-medium mb-3">Paid Plans</h4>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        {paidPlans.map((plan) => (
+                          <PlanCard
+                            key={plan.id}
+                            plan={plan}
+                            selected={form.watch('planId') === plan.id}
+                            onSelect={() => {
+                              form.setValue('planId', plan.id);
+                              setSelectedPlan(plan);
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Enterprise plans */}
+                    <div>
+                      <h4 className="text-md font-medium mb-3">Enterprise</h4>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        {enterprisePlans.map((plan) => (
+                          <PlanCard
+                            key={plan.id}
+                            plan={plan}
+                            selected={form.watch('planId') === plan.id}
+                            onSelect={() => {
+                              form.setValue('planId', plan.id);
+                              setSelectedPlan(plan);
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                )}
-
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <span className="opacity-0">Create Organization</span>
-                      <span className="absolute inset-0 flex items-center justify-center">
-                        <div className="h-5 w-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
-                      </span>
-                    </>
-                  ) : 'Create Organization'}
-                </Button>
-              </form>
-            </Form>
+                  
+                  {/* Error display */}
+                  {error && (
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertTitle>Error</AlertTitle>
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
+                  
+                  {/* Submit button */}
+                  <div className="flex justify-end">
+                    <Button 
+                      type="submit" 
+                      disabled={isSubmitting}
+                      className="w-full sm:w-auto"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <span className="opacity-0">Creating...</span>
+                          <span className="absolute inset-0 flex items-center justify-center">
+                            <div className="h-5 w-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
+                          </span>
+                        </>
+                      ) : (
+                        'Create Organization'
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </CardContent>
           </Card>
         </div>
-      </main>
-    </>
+      </div>
+    </div>
   );
 } 

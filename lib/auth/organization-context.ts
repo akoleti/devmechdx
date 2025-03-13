@@ -13,10 +13,26 @@ export async function setCurrentOrganization(userId: string, organizationId: str
           userId,
           organizationId
         }
+      },
+      include: {
+        organization: true  // Include the organization data to get the name
       }
     });
 
     if (!membership || membership.isDeleted || !membership.isActive) {
+      return false;
+    }
+
+    // Get full organization details to store in the session
+    const organization = await prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: {
+        id: true,
+        name: true
+      }
+    });
+
+    if (!organization) {
       return false;
     }
 

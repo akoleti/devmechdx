@@ -1,0 +1,1 @@
+SELECT id, name, description, price, "trialDays", savings, "requiresCard", "isPopular", "isCustom" FROM "Plan" ORDER BY name; 

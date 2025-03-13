@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
-import { signOut } from 'next-auth/react';
+import { useState, useEffect, useRef } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { signOut, useSession } from 'next-auth/react';
 import {
   Search,
   Bell,
@@ -34,6 +34,9 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
+import OrganizationSwitcher from '@/components/organization-switcher';
+import OrganizationDisplay from '@/components/organization-display';
+
 const navigationItems = [
   {
     name: 'Dashboard',
@@ -69,6 +72,17 @@ export default function FunctionalNavbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [hasNotifications, setHasNotifications] = useState(true);
   const pathname = usePathname();
+  const router = useRouter();
+  const { data: session, status, update } = useSession();
+  const hasRefreshedRef = useRef(false);
+
+  // Get the first character of the user's name
+  const getUserInitial = () => {
+    if (session?.user?.name) {
+      return session.user.name.charAt(0).toUpperCase();
+    }
+    return 'U';
+  };
 
   // Handle logout function
   const handleLogout = async () => {
@@ -79,6 +93,44 @@ export default function FunctionalNavbar() {
   useEffect(() => {
     setIsOpen(false);
   }, [pathname]);
+
+  // Log the session and fetch organization data only once
+  useEffect(() => {
+    const refreshOrganizationData = async () => {
+      try {
+        // Only log once to avoid console spam
+        console.log("Initial session in profile:", JSON.stringify(session?.user?.currentOrganization || {}));
+        
+        const response = await fetch('/api/user/current-organization');
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Compare current organization with new data to avoid unnecessary updates
+          const currentOrgId = session?.user?.currentOrganization?.id;
+          const newOrgId = data.currentOrganization?.id;
+          
+          // Only update if the data is different or missing
+          if (data.currentOrganization && (!currentOrgId || currentOrgId !== newOrgId)) {
+            console.log("Updating session with fresh organization data:", data.currentOrganization);
+            await update({
+              currentOrganization: data.currentOrganization,
+              currentRole: data.currentRole
+            });
+          } else {
+            console.log("Organization data already up to date, no update needed");
+          }
+        }
+      } catch (error) {
+        console.error("Error refreshing organization data:", error);
+      }
+    };
+    
+    // Only refresh once when session is available and we haven't refreshed yet
+    if (session && !hasRefreshedRef.current) {
+      hasRefreshedRef.current = true;
+      refreshOrganizationData();
+    }
+  }, [session, update]);
 
   return (
     
@@ -166,13 +218,14 @@ export default function FunctionalNavbar() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
                 <Avatar>
-                  <AvatarImage src="/images/placeholder-user.jpg" alt="User" />
-                  <AvatarFallback>U</AvatarFallback>
+                  <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || "User"} />
+                  <AvatarFallback>{getUserInitial()}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuLabel>{session?.user?.name || "My Account"}</DropdownMenuLabel>
+              {session && <OrganizationDisplay variant="compact" className="px-2 py-1" />}
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href="/profile">
@@ -180,8 +233,8 @@ export default function FunctionalNavbar() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/organizations">
-                  <Building className="mr-2 h-4 w-4" /> Organizations
+                <Link href="/organization">
+                  <Building className="mr-2 h-4 w-4" /> Organization
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>

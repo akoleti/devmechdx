@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { User, Mail, Building, Calendar } from "lucide-react";
 import Footer from '@/components/navigation/Footer';
+import OrganizationDisplay from '@/components/organization-display';
 
 export default function ProfilePage() {
   const { data: session } = useSession();
@@ -28,7 +29,10 @@ export default function ProfilePage() {
                 <AvatarFallback>{session?.user?.name?.split(' ').map(n => n[0]).join('') || 'U'}</AvatarFallback>
               </Avatar>
               <h2 className="text-xl font-semibold">{session?.user?.name || 'User'}</h2>
-              <p className="text-gray-500 mb-4">{session?.user?.email || 'email@example.com'}</p>
+              <p className="text-gray-500 mb-2">{session?.user?.email || 'email@example.com'}</p>
+              
+              <OrganizationDisplay variant="badge" className="mt-1 mb-4" />
+              
               <div className="w-full mt-4">
                 <Button className="w-full">Edit Profile</Button>
               </div>
@@ -63,7 +67,9 @@ export default function ProfilePage() {
                   <Building className="h-5 w-5 text-gray-500 mr-3" />
                   <div>
                     <p className="text-sm text-gray-500">Primary Organization</p>
-                    <p className="font-medium">{session?.user?.currentOrganization?.name || 'No organization selected'}</p>
+                    <div className="font-medium">
+                      <OrganizationDisplay />
+                    </div>
                   </div>
                 </div>
                 
