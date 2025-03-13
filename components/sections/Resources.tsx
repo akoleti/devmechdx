@@ -14,19 +14,6 @@ import { cn } from '@/lib/utils';
 
 const resources = [
   {
-    title: 'Blog & News',
-    description: 'Latest industry insights, updates, and best practices',
-    icon: Newspaper,
-    items: [
-      { title: 'Predictive Maintenance in 2024', date: 'Jan 15, 2024' },
-      { title: 'IoT in Equipment Management', date: 'Jan 8, 2024' },
-      { title: 'Cost Reduction Strategies', date: 'Jan 2, 2024' },
-    ],
-    link: '/blog',
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
-  },
-  {
     title: 'Documentation',
     description: 'Comprehensive guides and API documentation',
     icon: BookOpen,
@@ -51,32 +38,6 @@ const resources = [
     link: '/tutorials',
     color: 'text-red-600',
     bgColor: 'bg-red-50',
-  },
-  {
-    title: 'Webinars',
-    description: 'Live sessions and recorded presentations',
-    icon: Video,
-    items: [
-      { title: 'Monthly Product Updates', date: 'Every Month' },
-      { title: 'Industry Best Practices', date: 'Bi-weekly' },
-      { title: 'Q&A Sessions', date: 'Weekly' },
-    ],
-    link: '/webinars',
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
-  },
-  {
-    title: 'White Papers',
-    description: 'In-depth research and industry reports',
-    icon: FileText,
-    items: [
-      { title: 'ROI of Predictive Maintenance', type: 'Report' },
-      { title: 'Industry Benchmarks 2024', type: 'Research' },
-      { title: 'Digital Transformation Guide', type: 'Guide' },
-    ],
-    link: '/resources',
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
   },
   {
     title: 'Help Center',
@@ -161,24 +122,6 @@ const Resources = () => {
               Search our knowledge base or contact our support team
             </p>
             <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild>
-                <a href="/search" className="gap-2">
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                  Search Knowledge Base
-                </a>
-              </Button>
               <Button variant="outline" asChild>
                 <a href="/support" className="gap-2">
                   <HelpCircle className="h-4 w-4" />

@@ -56,6 +56,9 @@ export async function GET(req: NextRequest) {
 const createOrganizationSchema = z.object({
   name: z.string().min(2),
   type: z.enum(['CUSTOMER', 'VENDOR']),
+  planId: z.string(),
+  planStartDate: z.date().optional(),
+  planEndDate: z.date().optional(),
 });
 
 // Create a new organization
@@ -83,17 +86,23 @@ export async function POST(req: NextRequest) {
       );
     }
     
-    const { name, type } = validationResult.data;
+    const { name, type, planId, planStartDate, planEndDate } = validationResult.data;
 
-    // Get the default free plan if available
-    const freePlan = await prisma.plan.findFirst({
+    // Verify the plan exists and is active
+    const plan = await prisma.plan.findUnique({
       where: {
-        OR: [
-          { name: 'Free' },
-          { price: 0 }
-        ]
+        id: planId,
+        isActive: true,
+        isDeleted: false,
       }
     });
+
+    if (!plan) {
+      return NextResponse.json(
+        { error: 'Invalid plan selected' },
+        { status: 400 }
+      );
+    }
     
     // Start a transaction to create organization and relationship
     const result = await prisma.$transaction(async (tx) => {
@@ -103,7 +112,10 @@ export async function POST(req: NextRequest) {
           name,
           type,
           ownerId: session.user.id,
-          planId: freePlan?.id || 'free',
+          planId,
+          planStartDate: planStartDate || new Date(),
+          planEndDate: planEndDate || new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+          planStatus: 'ACTIVE',
         },
       });
       

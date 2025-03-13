@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Building, ArrowUpCircle } from 'lucide-react';
 
 const planDetails = {
   starter: {
@@ -58,13 +60,17 @@ export default function BillingForm({ onSubmit, initialData, plan, billing = 'mo
   const [mounted, setMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showHints, setShowHints] = useState(false);
+  const searchParams = useSearchParams();
+  const urlAmount = searchParams?.get('amount');
+  const fromOrgId = searchParams?.get('fromOrg');
+  const isOrgUpgrade = !!fromOrgId;
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   const planInfo = planDetails[plan as keyof typeof planDetails];
-  const amount = planInfo?.price[billing];
+  const amount = urlAmount || planInfo?.price[billing];
   const period = billing === 'monthly' ? '/month' : '/year';
   const formSchema = z.object({
     cardNumber: z.string()
@@ -134,13 +140,25 @@ export default function BillingForm({ onSubmit, initialData, plan, billing = 'mo
         // For test card, skip actual payment processing
         await onSubmit({
           ...data,
-          isTestCard: true
+          isTestCard: true,
+          plan,
+          billing,
+          amount,
+          fromOrganization: isOrgUpgrade,
+          organizationId: fromOrgId
         });
         return;
       }
 
       // Normal submission for real cards
-      await onSubmit(data);
+      await onSubmit({
+        ...data,
+        plan,
+        billing,
+        amount,
+        fromOrganization: isOrgUpgrade,
+        organizationId: fromOrgId
+      });
     } finally {
       setIsLoading(false);
     }
@@ -152,6 +170,25 @@ export default function BillingForm({ onSubmit, initialData, plan, billing = 'mo
 
   return (
     <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-6">
+      {/* Organization upgrade notice - only shown for org upgrades */}
+      {isOrgUpgrade && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex items-start">
+            <ArrowUpCircle className="h-5 w-5 text-blue-500 mt-0.5 mr-2" />
+            <div>
+              <h3 className="font-medium text-blue-800">Organization Plan Upgrade</h3>
+              <p className="text-sm text-blue-700 mt-1">
+                You're upgrading your organization's plan. This will be billed to your organization's payment method.
+              </p>
+              <div className="flex items-center mt-3 text-sm">
+                <Building className="h-4 w-4 mr-1 text-blue-600" />
+                <span className="font-medium">{initialData?.company || 'Your Organization'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Plan Summary */}
       <div className="bg-muted/50 rounded-lg p-4 mb-6">
         <div className="flex justify-between items-center mb-2">
@@ -264,11 +301,17 @@ export default function BillingForm({ onSubmit, initialData, plan, billing = 'mo
         type="submit" 
         className={cn(
           "w-full",
-          isTestCard && "bg-blue-500 hover:bg-blue-600"
+          isTestCard && "bg-blue-500 hover:bg-blue-600",
+          isOrgUpgrade && !isTestCard && "bg-green-600 hover:bg-green-700"
         )} 
         disabled={isLoading}
       >
-        {isTestCard ? 'Continue with Test Card' : `Pay ${amount} ${billing === 'monthly' ? 'monthly' : 'annually'}`}
+        {isTestCard 
+          ? 'Continue with Test Card' 
+          : isOrgUpgrade 
+            ? `Upgrade to ${planInfo?.name} Plan` 
+            : `Pay ${amount} ${billing === 'monthly' ? 'monthly' : 'annually'}`
+        }
       </Button>
     </form>
   );

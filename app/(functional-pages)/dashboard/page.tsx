@@ -37,6 +37,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import DonutChart from './components/DonutChart';
+import OrganizationDisplay from '@/components/organization-display';
 
 // Mock data for demonstration
 const stats = [
@@ -91,9 +92,17 @@ export default function Dashboard() {
   
   return (
     <div className="container mx-auto p-4 space-y-6">
-      {/* Header with Create New button */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+      {/* Header with organization name and Create New button */}
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">Dashboard</h1>
+            <OrganizationDisplay variant="badge" />
+          </div>
+          <p className="text-gray-500 text-sm mt-1">
+            Viewing data for <OrganizationDisplay />
+          </p>
+        </div>
         <Button variant="default" className="bg-purple-700 hover:bg-purple-800">
           + Create New
         </Button>

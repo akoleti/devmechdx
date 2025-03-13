@@ -73,17 +73,9 @@ CREATE TABLE "Session" (
     "userId" UUID NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "currentOrganizationId" UUID,
 
     CONSTRAINT "Session_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "VerificationToken" (
-    "identifier" TEXT NOT NULL,
-    "token" TEXT NOT NULL,
-    "expires" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "VerificationToken_pkey" PRIMARY KEY ("identifier","token")
 );
 
 -- CreateTable
@@ -103,6 +95,15 @@ CREATE TABLE "Organization" (
     "planStartDate" TIMESTAMP(3),
     "planEndDate" TIMESTAMP(3),
     "planStatus" "OrganizationPlanStatus" NOT NULL DEFAULT 'ACTIVE',
+    "description" TEXT,
+    "address" TEXT,
+    "city" TEXT,
+    "state" TEXT,
+    "zip" TEXT,
+    "country" TEXT,
+    "phone" TEXT,
+    "email" TEXT,
+    "website" TEXT,
 
     CONSTRAINT "Organization_pkey" PRIMARY KEY ("id")
 );
@@ -122,13 +123,19 @@ CREATE TABLE "Plan" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
-    "price" INTEGER NOT NULL,
+    "price" DECIMAL NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
     "isDeleted" BOOLEAN NOT NULL DEFAULT false,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "isArchived" BOOLEAN NOT NULL DEFAULT false,
+    "features" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "trialDays" INTEGER,
+    "savings" DECIMAL,
+    "requiresCard" BOOLEAN DEFAULT true,
+    "isPopular" BOOLEAN DEFAULT false,
+    "isCustom" BOOLEAN DEFAULT false,
 
     CONSTRAINT "Plan_pkey" PRIMARY KEY ("id")
 );
@@ -145,6 +152,7 @@ CREATE TABLE "OrganizationUser" (
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "isVerified" BOOLEAN NOT NULL DEFAULT false,
     "isArchived" BOOLEAN NOT NULL DEFAULT false,
+    "role" "Role" NOT NULL DEFAULT 'USER',
 
     CONSTRAINT "OrganizationUser_pkey" PRIMARY KEY ("id")
 );
@@ -363,6 +371,15 @@ CREATE TABLE "RequestDemo" (
     CONSTRAINT "RequestDemo_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "verification_tokens" (
+    "identifier" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "expires" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "verification_tokens_pkey" PRIMARY KEY ("identifier","token")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
@@ -380,6 +397,9 @@ CREATE UNIQUE INDEX "Industry_slug_key" ON "Industry"("slug");
 
 -- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "Session" ADD CONSTRAINT "Session_currentOrganizationId_fkey" FOREIGN KEY ("currentOrganizationId") REFERENCES "Organization"("id") ON DELETE SET NULL ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
@@ -436,16 +456,16 @@ ALTER TABLE "Equipment" ADD CONSTRAINT "Equipment_organizationId_fkey" FOREIGN K
 ALTER TABLE "EquipmentDesignInfo" ADD CONSTRAINT "EquipmentDesignInfo_equipmentId_fkey" FOREIGN KEY ("equipmentId") REFERENCES "Equipment"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "LogEntry" ADD CONSTRAINT "LogEntry_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE "LogEntry" ADD CONSTRAINT "LogEntry_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "Location"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+ALTER TABLE "LogEntry" ADD CONSTRAINT "LogEntry_equipmentDesignInfoId_fkey" FOREIGN KEY ("equipmentDesignInfoId") REFERENCES "EquipmentDesignInfo"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "LogEntry" ADD CONSTRAINT "LogEntry_equipmentId_fkey" FOREIGN KEY ("equipmentId") REFERENCES "Equipment"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "LogEntry" ADD CONSTRAINT "LogEntry_equipmentDesignInfoId_fkey" FOREIGN KEY ("equipmentDesignInfoId") REFERENCES "EquipmentDesignInfo"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+ALTER TABLE "LogEntry" ADD CONSTRAINT "LogEntry_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "Location"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "LogEntry" ADD CONSTRAINT "LogEntry_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "LogEntry" ADD CONSTRAINT "LogEntry_technicianId_fkey" FOREIGN KEY ("technicianId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE NO ACTION;

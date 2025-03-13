@@ -87,12 +87,36 @@ export const config: NextAuthConfig = {
             if (token.currentOrganization) {
                 session.user.currentOrganization = token.currentOrganization;
                 session.user.currentRole = token.currentRole;
+                console.log("Setting session.user.currentOrganization:", token.currentOrganization);
             }
             
             if (trigger === "update") {
                 session.user.name = token.name as string;
                 session.user.email = token.email as string;
                 session.user.role = token.role as Role;
+                
+                // If update includes currentOrganization, set it in the session
+                if (session.currentOrganization) {
+                    // Ensure the currentOrganization is a valid object
+                    if (typeof session.currentOrganization === 'object' && 
+                        session.currentOrganization !== null &&
+                        session.currentOrganization.id) {
+                        
+                        session.user.currentOrganization = session.currentOrganization;
+                        console.log("Updated session with organization:", session.user.currentOrganization);
+                        
+                        // Only set currentRole if it's a valid string
+                        if (typeof session.currentRole === 'string') {
+                            session.user.currentRole = session.currentRole;
+                        }
+                        
+                        // Clean up the session object
+                        delete session.currentOrganization;
+                        delete session.currentRole;
+                    } else {
+                        console.error("Invalid organization data in session update:", session.currentOrganization);
+                    }
+                }
             }
             return session;
         },
@@ -104,9 +128,23 @@ export const config: NextAuthConfig = {
             }
             
             // Handle organization selection via session update
-            if (trigger === "update" && session?.currentOrganization) {
-                token.currentOrganization = session.currentOrganization;
-                token.currentRole = session.currentRole;
+            if (trigger === "update" && session) {
+                // Only update if currentOrganization is a valid object
+                if (session.currentOrganization && 
+                    typeof session.currentOrganization === 'object' && 
+                    session.currentOrganization !== null &&
+                    session.currentOrganization.id) {
+                    
+                    console.log("JWT callback - Updating currentOrganization:", session.currentOrganization);
+                    token.currentOrganization = session.currentOrganization;
+                    
+                    // Only set currentRole if it's a valid string
+                    if (typeof session.currentRole === 'string') {
+                        token.currentRole = session.currentRole;
+                    }
+                } else if (session.currentOrganization) {
+                    console.error("JWT callback - Invalid organization data:", session.currentOrganization);
+                }
             }
             
             return token;

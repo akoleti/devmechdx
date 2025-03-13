@@ -1,11 +1,15 @@
-const { PrismaClient, Role, OrganizationType, OrganizationPlanStatus, EquipmentType, EquipmentDesignInfoType } = require('@prisma/client');
-import * as cryptoNode from 'crypto';
+import { PrismaClient, Role, OrganizationType, OrganizationPlanStatus, EquipmentType, EquipmentDesignInfoType } from '@prisma/client';
+import { hashPassword } from '../lib/auth/password.js';
 
 const prisma = new PrismaClient();
 
-// Simple password hashing function for seed data (not for production use)
-function hashPassword(password: string): string {
-  return cryptoNode.createHash('sha256').update(password).digest('hex');
+async function cleanDatabase() {
+  // Delete all records in reverse order of dependencies
+  await prisma.session.deleteMany();
+  await prisma.organizationUser.deleteMany();
+  await prisma.organization.deleteMany();
+  await prisma.user.deleteMany();
+  await prisma.plan.deleteMany();
 }
 
 async function main() {
@@ -18,7 +22,7 @@ async function main() {
   const freePlan = await prisma.plan.create({
     data: {
       name: 'Free',
-      description: 'Basic features for small teams',
+      description: 'Perfect for small teams and startups',
       price: 0,
       isActive: true,
     },
@@ -27,8 +31,8 @@ async function main() {
   const proPlan = await prisma.plan.create({
     data: {
       name: 'Pro',
-      description: 'Advanced features for growing organizations',
-      price: 29,
+      description: 'Ideal for growing organizations',
+      price: 299,
       isActive: true,
     },
   });
@@ -36,8 +40,8 @@ async function main() {
   const enterprisePlan = await prisma.plan.create({
     data: {
       name: 'Enterprise',
-      description: 'Custom solutions for large organizations',
-      price: 99,
+      description: 'For large organizations with advanced needs',
+      price: 999,
       isActive: true,
     },
   });
@@ -171,7 +175,7 @@ async function main() {
     },
   });
 
-  // Tech user belongs to two organizations
+  // Tech user is part of tech support org
   await prisma.organizationUser.create({
     data: {
       organizationId: techSupportOrg.id,
@@ -182,17 +186,7 @@ async function main() {
     },
   });
 
-  await prisma.organizationUser.create({
-    data: {
-      organizationId: acmeOrg.id,
-      userId: techUser.id,
-      role: Role.TECHNICIAN,
-      isActive: true,
-      isVerified: true,
-    },
-  });
-
-  // Manager user in Acme
+  // Manager user is part of Acme Corp
   await prisma.organizationUser.create({
     data: {
       organizationId: acmeOrg.id,
@@ -203,20 +197,10 @@ async function main() {
     },
   });
 
-  // Customer user is owner of Small Business and a customer at Acme
+  // Customer user is part of Small Business LLC
   await prisma.organizationUser.create({
     data: {
       organizationId: smallBizOrg.id,
-      userId: customerUser.id,
-      role: Role.ADMINISTRATOR,
-      isActive: true,
-      isVerified: true,
-    },
-  });
-
-  await prisma.organizationUser.create({
-    data: {
-      organizationId: acmeOrg.id,
       userId: customerUser.id,
       role: Role.CUSTOMER,
       isActive: true,
@@ -225,6 +209,41 @@ async function main() {
   });
 
   console.log('Created organization user relationships');
+
+  // Create sessions for users
+  await prisma.session.create({
+    data: {
+      id: adminUser.id,
+      userId: adminUser.id,
+      currentOrganizationId: acmeOrg.id,
+    },
+  });
+
+  await prisma.session.create({
+    data: {
+      id: techUser.id,
+      userId: techUser.id,
+      currentOrganizationId: techSupportOrg.id,
+    },
+  });
+
+  await prisma.session.create({
+    data: {
+      id: managerUser.id,
+      userId: managerUser.id,
+      currentOrganizationId: acmeOrg.id,
+    },
+  });
+
+  await prisma.session.create({
+    data: {
+      id: customerUser.id,
+      userId: customerUser.id,
+      currentOrganizationId: smallBizOrg.id,
+    },
+  });
+
+  console.log('Created sessions');
 
   // Create contacts for organizations
   const acmeContact = await prisma.contact.create({
@@ -375,40 +394,7 @@ async function main() {
 
   console.log('Created equipment design info');
 
-  // Create session with current organization for admin user
-  await prisma.session.create({
-    data: {
-      userId: adminUser.id,
-      currentOrganizationId: acmeOrg.id,
-    },
-  });
-
-  console.log('Created session for admin user');
-
   console.log('Database seeding completed!');
-}
-
-async function cleanDatabase() {
-  // Delete existing data in reverse order of dependencies
-  await prisma.upload.deleteMany({});
-  await prisma.logEntry.deleteMany({});
-  await prisma.equipmentDesignInfo.deleteMany({});
-  await prisma.equipment.deleteMany({});
-  await prisma.location.deleteMany({});
-  await prisma.contact.deleteMany({});
-  await prisma.session.deleteMany({});
-  await prisma.organizationUser.deleteMany({});
-  await prisma.alert.deleteMany({});
-  await prisma.activity.deleteMany({});
-  await prisma.apiKey.deleteMany({});
-  await prisma.audit.deleteMany({});
-  await prisma.vendor.deleteMany({});
-  await prisma.organization.deleteMany({});
-  await prisma.plan.deleteMany({});
-  await prisma.account.deleteMany({});
-  await prisma.user.deleteMany({});
-  
-  console.log('Cleaned existing data');
 }
 
 main()
